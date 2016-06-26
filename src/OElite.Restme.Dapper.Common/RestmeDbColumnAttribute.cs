@@ -12,7 +12,8 @@ namespace OElite
         public bool InInsert { get; set; }
         public string DbColumnName { get; }
 
-        public RestmeDbColumnAttribute(RestmeDbColumnType type, [CallerMemberName] string dbColumnName = null)
+        public RestmeDbColumnAttribute(RestmeDbColumnType type = RestmeDbColumnType.NormalColumn,
+            [CallerMemberName] string dbColumnName = null)
         {
             if (dbColumnName.IsNullOrEmpty())
                 throw new ArgumentNullException(nameof(dbColumnName));

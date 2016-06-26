@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OElite.Restme.Dapper
 {
-    public interface IOEliteDbQuery
+    public interface IRestmeDbQuery
     {
         RestmeDb DbCentre { get; set; }
 
@@ -28,7 +28,7 @@ namespace OElite.Restme.Dapper
         void MapDeleteColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null);
     }
 
-    public abstract class OEliteDbQuery<T> : IOEliteDbQuery where T : IRestmeDbEntity
+    public abstract class RestmeDbQuery<T> : IRestmeDbQuery where T : IRestmeDbEntity
     {
         public RestmeDb DbCentre { get; set; }
 
@@ -43,7 +43,7 @@ namespace OElite.Restme.Dapper
         public Dictionary<string, object> ParamValues { get; } = new Dictionary<string, object>();
 
 
-        protected OEliteDbQuery(RestmeDb dbCentre)
+        protected RestmeDbQuery(RestmeDb dbCentre)
         {
             DbCentre = dbCentre;
             DbTableName = TableAttribute.DbTableName;
@@ -74,7 +74,7 @@ namespace OElite.Restme.Dapper
             {
                 var attribute = typeof(T).GetTypeInfo().GetCustomAttribute(typeof(RestmeTableAttribute));
                 if (attribute == null)
-                    throw new ArgumentNullException($"{nameof(T)} does not contain valid QueryTableAttribute");
+                    throw new ArgumentException($"{typeof(T)} does not contain valid QueryTableAttribute");
                 return (RestmeTableAttribute) attribute;
             }
         }

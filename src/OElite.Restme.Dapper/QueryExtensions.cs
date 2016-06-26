@@ -43,7 +43,7 @@ namespace OElite.Restme.Dapper
         }
 
 
-        public static OEliteDbQueryString Query(this IOEliteDbQuery dbQuery, string whereConditionClause = null,
+        public static OEliteDbQueryString Query(this IRestmeDbQuery dbQuery, string whereConditionClause = null,
             string orderByClause = null,
             string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
         {
@@ -61,11 +61,11 @@ namespace OElite.Restme.Dapper
             return new OEliteDbQueryString(query, dbCentre: dbQuery.DbCentre ?? new RestmeDb());
         }
 
-        public static OEliteDbQueryString Insert<T>(this IOEliteDbQuery dbQuery, T data,
+        public static OEliteDbQueryString Insert<T>(this IRestmeDbQuery dbQuery, T data,
             string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where T : IRestmeDbEntity
         {
             dbQuery.MapInsertColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((OEliteDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
+            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
 
             var query =
                 $"insert into {dbQuery.DbTableName}({string.Join(",", dbQuery.ParamValues.Select(c => c.Key))}) " +
@@ -78,7 +78,7 @@ namespace OElite.Restme.Dapper
             return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
         }
 
-        public static OEliteDbQueryString Update<T>(this IOEliteDbQuery dbQuery, T data,
+        public static OEliteDbQueryString Update<T>(this IRestmeDbQuery dbQuery, T data,
             string whereConditionClause, string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
             where T : IRestmeDbEntity
         {
@@ -87,7 +87,7 @@ namespace OElite.Restme.Dapper
                     "Update without condition will update all data records of the requested table(s), the action is disabled for data protection.");
 
             dbQuery.MapUpdateColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((OEliteDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
+            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
 
             var query =
                 $"update {dbQuery.DbTableName} set {string.Join(", ", dbQuery.ParamValues.Select(c => c.Key + " = @" + c.Key))} " +
@@ -99,7 +99,7 @@ namespace OElite.Restme.Dapper
             return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
         }
 
-        public static OEliteDbQueryString Delete<T>(this IOEliteDbQuery dbQuery, T data,
+        public static OEliteDbQueryString Delete<T>(this IRestmeDbQuery dbQuery, T data,
             string whereConditionClause, string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
             where T : IRestmeDbEntity
         {
@@ -107,7 +107,7 @@ namespace OElite.Restme.Dapper
                 throw new ArgumentException(
                     "Delete without condition will remove all data of the requested table(s), the action is disabled for data protection.");
             dbQuery.MapDeleteColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((OEliteDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
+            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
 
             var query =
                 $"delete from {dbQuery.DbTableName} " +
@@ -116,6 +116,18 @@ namespace OElite.Restme.Dapper
             var paramValues = new ExpandoObject();
             var dic = (IDictionary<string, object>) paramValues;
             dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
+            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+        }
+
+        public static OEliteDbQueryString Delete(this IRestmeDbQuery dbQuery, string whereConditionClause,
+            dynamic paramValues)
+        {
+            if (whereConditionClause.IsNullOrEmpty())
+                throw new ArgumentException(
+                    "Delete without condition will remove all data of the requested table(s), the action is disabled for data protection.");
+            var query =
+                $"delete from {dbQuery.DbTableName} " +
+                (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
             return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
         }
 

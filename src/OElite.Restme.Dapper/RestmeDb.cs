@@ -11,14 +11,14 @@ namespace OElite.Restme.Dapper
 {
     public partial class RestmeDb : IDisposable
     {
-        private readonly List<IOEliteDbQuery> _dbQueries = new List<IOEliteDbQuery>();
+        private readonly List<IRestmeDbQuery> _dbQueries = new List<IRestmeDbQuery>();
 
         private readonly string _dbConnectionString = null;
 
         public RestmeDb()
         {
             if (DefaultConnectionString.IsNullOrEmpty())
-                throw new ArgumentNullException(
+                throw new ArgumentException(
                     $"DefaultConnectionString is not present - try instantiate {this.GetType().Name} with a valid connection string first.");
             Connection = NewConnection();
         }
@@ -67,7 +67,7 @@ namespace OElite.Restme.Dapper
             }
         }
 
-        public T DbQuery<TE, T>() where T : OEliteDbQuery<TE> where TE : IRestmeDbEntity
+        public T DbQuery<TE, T>() where T : RestmeDbQuery<TE> where TE : IRestmeDbEntity
         {
             var query = _dbQueries.FirstOrDefault(item => item is T);
             if (query != null) return (T) query;
