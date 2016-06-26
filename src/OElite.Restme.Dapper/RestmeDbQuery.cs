@@ -107,7 +107,12 @@ namespace OElite.Restme.Dapper
                                                                      (choosenPropertiesOnly == null ||
                                                                       choosenPropertiesOnly.Contains(dic.Key)) &&
                                                                      (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)))
+                                                                      !propertiesToExclude.Contains(dic.Key)) &&
+                                                                     (
+                                                                         TableAttribute.ExcludedProperties == null ||
+                                                                         !TableAttribute.ExcludedProperties.Contains(
+                                                                             dic.Key)
+                                                                         ))
                 .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
 
         public virtual void MapUpdateColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
@@ -115,7 +120,12 @@ namespace OElite.Restme.Dapper
                                                                      (choosenPropertiesOnly == null ||
                                                                       choosenPropertiesOnly.Contains(dic.Key)) &&
                                                                      (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)))
+                                                                      !propertiesToExclude.Contains(dic.Key)) &&
+                                                                     (
+                                                                         TableAttribute.ExcludedProperties == null ||
+                                                                         !TableAttribute.ExcludedProperties.Contains(
+                                                                             dic.Key)
+                                                                         ))
                 .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
 
         public virtual void MapInsertColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
@@ -123,7 +133,12 @@ namespace OElite.Restme.Dapper
                                                                      (choosenPropertiesOnly == null ||
                                                                       choosenPropertiesOnly.Contains(dic.Key)) &&
                                                                      (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)))
+                                                                      !propertiesToExclude.Contains(dic.Key)) &&
+                                                                     (
+                                                                         TableAttribute.ExcludedProperties == null ||
+                                                                         !TableAttribute.ExcludedProperties.Contains(
+                                                                             dic.Key)
+                                                                         ))
                 .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
 
         public virtual void MapDeleteColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
@@ -131,7 +146,12 @@ namespace OElite.Restme.Dapper
                                                                      (choosenPropertiesOnly == null ||
                                                                       choosenPropertiesOnly.Contains(dic.Key)) &&
                                                                      (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)))
+                                                                      !propertiesToExclude.Contains(dic.Key)) &&
+                                                                     (
+                                                                         TableAttribute.ExcludedProperties == null ||
+                                                                         !TableAttribute.ExcludedProperties.Contains(
+                                                                             dic.Key)
+                                                                         ))
                 .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
 
 

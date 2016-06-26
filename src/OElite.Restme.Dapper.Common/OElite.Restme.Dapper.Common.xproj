@@ -9,8 +9,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>4A3C420A-7192-4976-8F39-44B7E9B08F20</ProjectGuid>
     <RootNamespace>OElite.Restme.Dapper.Common</RootNamespace>
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <OutputPath Condition="'$(OutputPath)'=='' ">bin\$(MSBuildProjectName)\</OutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
+    <OutputPath Condition="'$(OutputPath)'=='' ">.\bin</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -7,6 +7,7 @@ namespace OElite
     {
         public string DbTableName { get; set; }
         public string DefaultOrderByClauseInQuery { get; set; }
+        public string[] ExcludedProperties { get; set; }
 
         public RestmeTableAttribute(string dbTableName)
         {
