@@ -3,13 +3,17 @@
     "Lida Weng"
   ],
   "dependencies": {
-    "NETStandard.Library": "1.6.0-*",
+    "NETStandard.Library": "1.6.0",
     "OElite.Restme.Utils": "1.0.0-*"
   },
   "description": "Restme.Dapper.Common (RESTme) is the common library for Restme.Dapper",
   "frameworks": {
     "netstandard1.6": {
-      "imports": [ "netcore50", "dnxcore50","portable-net45+win8" ]
+      "imports": [
+        "netcore50",
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   },
   "packOptions": {
@@ -19,7 +23,9 @@
     "tags": [
       "RESTme"
     ],
-    "repository": { "url": "https://github.com/oelite/RESTme.Dapper" },
+    "repository": {
+      "url": "https://github.com/oelite/RESTme.Dapper"
+    },
     "summary": "Restme.Dapper.Common (RESTme) is the common library for Restme.Dapper"
   },
   "version": "1.0.0-*"

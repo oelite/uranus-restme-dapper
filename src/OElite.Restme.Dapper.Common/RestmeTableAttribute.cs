@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace OElite
 {
@@ -12,6 +13,10 @@ namespace OElite
         public RestmeTableAttribute(string dbTableName)
         {
             this.DbTableName = dbTableName;
+            if (ExcludedProperties?.Length > 0 == false) return;
+            var filteredExclusions =
+                ExcludedProperties.ToList().Select(item => item.Trim()).Where(item => item.IsNotNullOrEmpty());
+            ExcludedProperties = filteredExclusions.ToArray();
         }
     }
 }

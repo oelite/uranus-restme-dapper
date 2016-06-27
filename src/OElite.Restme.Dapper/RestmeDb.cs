@@ -76,5 +76,15 @@ namespace OElite.Restme.Dapper
             _dbQueries.Add(query);
             return (T) query;
         }
+
+        public RestmeDbQuery<T> DbQuery<T>() where T : IRestmeDbEntity
+        {
+            var query = _dbQueries.FirstOrDefault(item => item is RestmeDbQuery<T>);
+            if (query != null) return (RestmeDbQuery<T>) query;
+
+            query = (RestmeDbQuery<T>) Activator.CreateInstance(typeof(RestmeDbQuery<T>), this);
+            _dbQueries.Add(query);
+            return (RestmeDbQuery<T>) query;
+        }
     }
 }
