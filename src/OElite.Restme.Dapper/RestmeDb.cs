@@ -70,21 +70,24 @@ namespace OElite.Restme.Dapper
         public T DbQuery<TE, T>() where T : RestmeDbQuery<TE> where TE : IRestmeDbEntity
         {
             var query = _dbQueries.FirstOrDefault(item => item is T);
-            if (query != null) return (T) query;
+            if (query != null) return (T)query;
 
-            query = (T) Activator.CreateInstance(typeof(T), this);
+            query = (T)Activator.CreateInstance(typeof(T), this);
             _dbQueries.Add(query);
-            return (T) query;
+            return (T)query;
         }
 
         public RestmeDbQuery<T> DbQuery<T>() where T : IRestmeDbEntity
         {
             var query = _dbQueries.FirstOrDefault(item => item is RestmeDbQuery<T>);
-            if (query != null) return (RestmeDbQuery<T>) query;
+            if (query != null) return (RestmeDbQuery<T>)query;
 
-            query = (RestmeDbQuery<T>) Activator.CreateInstance(typeof(RestmeDbQuery<T>), this);
+            var genericType = typeof(RestmeDbQuery<>);
+            var typeWithGeneric = genericType.MakeGenericType(typeof(T));
+            
+            query = (RestmeDbQuery<T>)Activator.CreateInstance(typeWithGeneric, new object[] { this });
             _dbQueries.Add(query);
-            return (RestmeDbQuery<T>) query;
+            return (RestmeDbQuery<T>)query;
         }
     }
 }

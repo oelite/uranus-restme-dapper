@@ -75,7 +75,7 @@ namespace OElite.Restme.Dapper
                 var attribute = typeof(T).GetTypeInfo().GetCustomAttribute(typeof(RestmeTableAttribute));
                 if (attribute == null)
                     throw new ArgumentException($"{typeof(T)} does not contain valid QueryTableAttribute");
-                return (RestmeTableAttribute) attribute;
+                return (RestmeTableAttribute)attribute;
             }
         }
 

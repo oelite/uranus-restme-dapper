@@ -9,12 +9,10 @@ namespace OElite.Restme.Dapper
 {
     public partial class RestmeDb
     {
-        public async Task<T> FetchAsync<T>(string standardQuery, object paramValues)
+        public Task<T> FetchAsync<T>(string standardQuery, object paramValues)
             where T : class
         {
-            var result =
-                await Connection.QueryFirstOrDefaultAsync<T>(standardQuery, paramValues);
-            return (T) result;
+            return Task.FromResult(Connection.QueryFirstOrDefault<T>(standardQuery, paramValues));
         }
 
         public async Task<TC> FetchAsync<T, TC>(string query, object paramValues)
@@ -34,14 +32,14 @@ namespace OElite.Restme.Dapper
             return resultSet;
         }
 
-        public async Task<long> ExecuteInsertAsync(string standardQuery, object paramValues)
+        public Task<long> ExecuteInsertAsync(string standardQuery, object paramValues)
         {
-            return await Connection.QuerySingleOrDefaultAsync<long>(standardQuery, paramValues);
+            return Task.FromResult(Connection.QuerySingleOrDefault<long>(standardQuery, paramValues));
         }
 
-        public async Task<int> ExecuteAsync(string standardQuery, object paramValues)
+        public Task<int> ExecuteAsync(string standardQuery, object paramValues)
         {
-            return await Connection.ExecuteAsync(standardQuery, paramValues);
+            return Task.FromResult(Connection.Execute(standardQuery, paramValues));
         }
     }
 }
