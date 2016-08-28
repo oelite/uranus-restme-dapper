@@ -20,74 +20,67 @@ namespace OElite.Restme.Dapper
             if (DefaultConnectionString.IsNullOrEmpty())
                 throw new ArgumentException(
                     $"DefaultConnectionString is not present - try instantiate {this.GetType().Name} with a valid connection string first.");
-            Connection = NewConnection();
         }
 
         public RestmeDb(string connectionString)
         {
             _dbConnectionString = connectionString;
-            Connection = NewConnection();
-        }
-
-        public IDbConnection Connection { get; }
-
-        public IDbTransaction NewTransaction()
-        {
-            return Connection.BeginTransaction();
         }
 
 
         public void Dispose()
         {
-            DisposeConnection(Connection);
         }
 
+        private IDbConnection _currentConnection { get; set; }
+        private IDbTransaction _currentTransaction { get; set; }
 
-        private IDbConnection NewConnection(string connectionString = null)
+        private async Task<IDbConnection> GetOpenConnectionAsync(bool establishTransaction = false,
+            string connectionString = null)
         {
             connectionString = connectionString ?? _dbConnectionString;
-            var conn = new SqlConnection(connectionString);
-            conn.Open();
-            if (DefaultConnectionString.IsNullOrEmpty())
-                DefaultConnectionString = connectionString;
-            return conn;
+            if (_currentConnection == null)
+            {
+                var conn = new SqlConnection(connectionString);
+                await conn.OpenAsync();
+                if (DefaultConnectionString.IsNullOrEmpty())
+                    DefaultConnectionString = connectionString;
+                _currentConnection = conn;
+            }
+            if (establishTransaction)
+                await GetDbTransactionAsync();
+            return _currentConnection;
         }
 
-
-        private static void DisposeConnection(IDbConnection dbConn)
+        public async Task<IDbTransaction> GetDbTransactionAsync()
         {
-            try
-            {
-                if (dbConn != null && dbConn.State != ConnectionState.Closed)
-                    dbConn.Dispose();
-            }
-            catch
-            {
-                //ignore exceptions
-            }
+            _currentTransaction = _currentTransaction ?? (await GetOpenConnectionAsync()).BeginTransaction();
+            return _currentTransaction;
         }
+
 
         public T DbQuery<TE, T>() where T : RestmeDbQuery<TE> where TE : IRestmeDbEntity
         {
             var query = _dbQueries.FirstOrDefault(item => item is T);
-            if (query != null) return (T)query;
+            if (query != null) return (T) query;
 
-            query = (T)Activator.CreateInstance(typeof(T), this);
+            query = (T) Activator.CreateInstance(typeof(T), new object[] {this});
             _dbQueries.Add(query);
-            return (T)query;
+            return (T) query;
         }
 
         public RestmeDbQuery<T> DbQuery<T>() where T : IRestmeDbEntity
         {
             var query = _dbQueries.FirstOrDefault(item => item is RestmeDbQuery<T>);
-            if (query != null) return (RestmeDbQuery<T>)query;
+            if (query != null) return (RestmeDbQuery<T>) query;
 
             var genericType = typeof(RestmeDbQuery<>);
-            var typeWithGeneric = genericType.MakeGenericType(typeof(T));
-            
-            query = (RestmeDbQuery<T>)Activator.CreateInstance(typeWithGeneric, new object[] { this });
+
+            var typeWithGeneric = genericType.MakeGenericType(new[] {typeof(T)});
+
+            query = (RestmeDbQuery<T>) Activator.CreateInstance(typeWithGeneric, new object[] {this});
             _dbQueries.Add(query);
-            return (RestmeDbQuery<T>)query;
+            return (RestmeDbQuery<T>) query;
         }
     }
 }

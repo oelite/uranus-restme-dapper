@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +16,6 @@ namespace OElite.Restme.Dapper
 
         Dictionary<string, string> DefaultColumnsInQuery { get; set; }
 
-
         string DefaultOrderByClauseInQuery { get; }
         string CustomSelectTableSource { get; }
         string DbTableName { get; }
@@ -28,12 +28,11 @@ namespace OElite.Restme.Dapper
         void MapDeleteColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null);
     }
 
-    public abstract class RestmeDbQuery<T> : IRestmeDbQuery where T : IRestmeDbEntity
+    public class RestmeDbQuery<T> : IRestmeDbQuery where T : IRestmeDbEntity
     {
         public RestmeDb DbCentre { get; set; }
 
         public virtual string CustomSelectTableSource { get; }
-
         public Dictionary<string, string> DefaultColumnsInQuery { get; set; } = new Dictionary<string, string>();
 
         public virtual string DefaultOrderByClauseInQuery { get; }
@@ -43,7 +42,7 @@ namespace OElite.Restme.Dapper
         public Dictionary<string, object> ParamValues { get; } = new Dictionary<string, object>();
 
 
-        protected RestmeDbQuery(RestmeDb dbCentre)
+        public RestmeDbQuery(RestmeDb dbCentre)
         {
             DbCentre = dbCentre;
             DbTableName = TableAttribute.DbTableName;
@@ -64,7 +63,20 @@ namespace OElite.Restme.Dapper
                 props = DefaultColumnsInQuery.Where(item => !propertiesToExclude.Contains(item.Key)).ToList();
             foreach (var prop in props)
             {
-                ParamValues.Add(prop.Key, data.GetPropertyValue(prop.Key));
+                var objValue = data.GetPropertyValue(prop.Key);
+                if (objValue != null && objValue is DateTime)
+                {
+                    if (DateTimeUtils.IsValidSqlDateTimeValue(objValue))
+                        ParamValues.Add(prop.Key, objValue);
+                    else
+                        ParamValues.Add(prop.Key, null);
+                }
+                else if (objValue != null && objValue.GetType().GetTypeInfo().IsEnum)
+                {
+                    ParamValues.Add(prop.Key, (int) objValue);
+                }
+                else
+                    ParamValues.Add(prop.Key, objValue);
             }
         }
 
@@ -75,7 +87,7 @@ namespace OElite.Restme.Dapper
                 var attribute = typeof(T).GetTypeInfo().GetCustomAttribute(typeof(RestmeTableAttribute));
                 if (attribute == null)
                     throw new ArgumentException($"{typeof(T)} does not contain valid QueryTableAttribute");
-                return (RestmeTableAttribute)attribute;
+                return (RestmeTableAttribute) attribute;
             }
         }
 
@@ -102,57 +114,62 @@ namespace OElite.Restme.Dapper
             }
         }
 
+
+        private Dictionary<string, string> GenerateDefaultColumnsInQuery(
+            string[] choosenPropertiesOnly = null,
+            string[] propertiesToExclude = null, bool? inSelect = null, bool? inInsert = null, bool? inUpdate = null,
+            bool? inDelete = null)
+        {
+            var columnAttributes = ColumnAttributes.Where(dic => (inSelect == null || dic.Value.InSelect == inSelect) &&
+                                                                 (inInsert == null || dic.Value.InInsert == inInsert) &&
+                                                                 (inUpdate == null || dic.Value.InUpdate == inUpdate) &&
+                                                                 (inDelete == null || dic.Value.InDelete == inDelete) &&
+                                                                 (choosenPropertiesOnly == null ||
+                                                                  choosenPropertiesOnly.Contains(dic.Key)) &&
+                                                                 (propertiesToExclude == null ||
+                                                                  !propertiesToExclude.Contains(dic.Key)) &&
+                                                                 (
+                                                                     TableAttribute.ExcludedProperties == null ||
+                                                                     !TableAttribute.ExcludedProperties.Contains(
+                                                                         dic.Key)
+                                                                 )).ToDictionary(d => d.Key, d => d.Value.DbColumnName) ??
+                                   new Dictionary<string, string>();
+
+            if (choosenPropertiesOnly != null && choosenPropertiesOnly.Any())
+            {
+                var unIdentifiedColumns = choosenPropertiesOnly.Where(item => !ColumnAttributes.ContainsKey(item));
+                if (unIdentifiedColumns != null && unIdentifiedColumns.Any())
+                {
+                    foreach (var col in unIdentifiedColumns)
+                    {
+                        columnAttributes.Add(Guid.NewGuid().ToString(), col);
+                    }
+                }
+            }
+            return columnAttributes;
+        }
+
+
         public virtual void MapSelectColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
-            => DefaultColumnsInQuery = ColumnAttributes.Where(dic => dic.Value.InSelect &&
-                                                                     (choosenPropertiesOnly == null ||
-                                                                      choosenPropertiesOnly.Contains(dic.Key)) &&
-                                                                     (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)) &&
-                                                                     (
-                                                                         TableAttribute.ExcludedProperties == null ||
-                                                                         !TableAttribute.ExcludedProperties.Contains(
-                                                                             dic.Key)
-                                                                         ))
-                .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
+            =>
+            DefaultColumnsInQuery =
+                GenerateDefaultColumnsInQuery(choosenPropertiesOnly,
+                    propertiesToExclude, inSelect: true);
 
         public virtual void MapUpdateColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
-            => DefaultColumnsInQuery = ColumnAttributes.Where(dic => dic.Value.InSelect &&
-                                                                     (choosenPropertiesOnly == null ||
-                                                                      choosenPropertiesOnly.Contains(dic.Key)) &&
-                                                                     (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)) &&
-                                                                     (
-                                                                         TableAttribute.ExcludedProperties == null ||
-                                                                         !TableAttribute.ExcludedProperties.Contains(
-                                                                             dic.Key)
-                                                                         ))
-                .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
+            => DefaultColumnsInQuery =
+                GenerateDefaultColumnsInQuery(choosenPropertiesOnly,
+                    propertiesToExclude, inUpdate: true);
 
         public virtual void MapInsertColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
-            => DefaultColumnsInQuery = ColumnAttributes.Where(dic => dic.Value.InSelect &&
-                                                                     (choosenPropertiesOnly == null ||
-                                                                      choosenPropertiesOnly.Contains(dic.Key)) &&
-                                                                     (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)) &&
-                                                                     (
-                                                                         TableAttribute.ExcludedProperties == null ||
-                                                                         !TableAttribute.ExcludedProperties.Contains(
-                                                                             dic.Key)
-                                                                         ))
-                .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
+            => DefaultColumnsInQuery =
+                GenerateDefaultColumnsInQuery(choosenPropertiesOnly,
+                    propertiesToExclude, inInsert: true);
 
         public virtual void MapDeleteColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
-            => DefaultColumnsInQuery = ColumnAttributes.Where(dic => dic.Value.InSelect &&
-                                                                     (choosenPropertiesOnly == null ||
-                                                                      choosenPropertiesOnly.Contains(dic.Key)) &&
-                                                                     (propertiesToExclude == null ||
-                                                                      !propertiesToExclude.Contains(dic.Key)) &&
-                                                                     (
-                                                                         TableAttribute.ExcludedProperties == null ||
-                                                                         !TableAttribute.ExcludedProperties.Contains(
-                                                                             dic.Key)
-                                                                         ))
-                .ToDictionary(d => d.Key, d => d.Value.DbColumnName);
+            => DefaultColumnsInQuery =
+                GenerateDefaultColumnsInQuery(choosenPropertiesOnly,
+                    propertiesToExclude, inDelete: true);
 
 
         public void Map(string propertyName, string dbColumnAlias)

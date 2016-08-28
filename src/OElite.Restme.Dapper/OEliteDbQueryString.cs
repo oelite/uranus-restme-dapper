@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices.ComTypes;
-
-namespace OElite.Restme.Dapper
+﻿namespace OElite.Restme.Dapper
 {
     public class OEliteDbQueryString
     {
@@ -13,11 +11,14 @@ namespace OElite.Restme.Dapper
 
         public string Query { get; internal set; }
         public object ParamValues { get; internal set; }
+        public bool Paginated = false;
+
+
         public RestmeDb DbCentre { get; internal set; }
 
         public OEliteDbQueryString Params(object paramValues)
         {
-            this.ParamValues = paramValues;
+            ParamValues = paramValues;
             return this;
         }
     }

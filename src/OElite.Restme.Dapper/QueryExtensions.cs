@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using System.Data;
 
 namespace OElite.Restme.Dapper
 {
@@ -27,6 +28,7 @@ namespace OElite.Restme.Dapper
 
             if (pageIndex >= 0 && pageSize > 0)
             {
+                query.Paginated = true;
                 if (outerOrderByClause.IsNullOrEmpty())
                     query.Query = $"{query.Query} " +
                                   $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
@@ -41,7 +43,6 @@ namespace OElite.Restme.Dapper
             query.Query = newQuery + query.Query;
             return query;
         }
-
 
         public static OEliteDbQueryString Query(this IRestmeDbQuery dbQuery, string whereConditionClause = null,
             string orderByClause = null,
@@ -62,20 +63,22 @@ namespace OElite.Restme.Dapper
         }
 
         public static OEliteDbQueryString Insert<T>(this IRestmeDbQuery dbQuery, T data,
-            string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where T : IRestmeDbEntity
+            string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null, bool expectIdentityScope = true)
+            where T : IRestmeDbEntity
         {
             dbQuery.MapInsertColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((RestmeDbQuery<T>)dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
+            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
 
             var query =
                 $"insert into {dbQuery.DbTableName}({string.Join(",", dbQuery.ParamValues.Select(c => c.Key))}) " +
-                $" values({string.Join(",", dbQuery.ParamValues.Select(c => "@" + c.Key))});" +
-                $" SELECT CAST(SCOPE_IDENTITY() as bigint)";
+                $" values({string.Join(",", dbQuery.ParamValues.Select(c => "@" + c.Key))});";
+            if (expectIdentityScope)
+                query = query + $" SELECT CAST(SCOPE_IDENTITY() as bigint)";
 
-            var paramValues = new ExpandoObject();
-            var dic = (IDictionary<string, object>)paramValues;
+            //var paramValues = new ExpandoObject();
+            var dic = new Dictionary<string, object>();
             dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
-            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+            return new OEliteDbQueryString(query, dic, dbQuery.DbCentre ?? new RestmeDb());
         }
 
         public static OEliteDbQueryString Update<T>(this IRestmeDbQuery dbQuery, T data,
@@ -87,14 +90,14 @@ namespace OElite.Restme.Dapper
                     "Update without condition will update all data records of the requested table(s), the action is disabled for data protection.");
 
             dbQuery.MapUpdateColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((RestmeDbQuery<T>)dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
+            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
 
             var query =
                 $"update {dbQuery.DbTableName} set {string.Join(", ", dbQuery.ParamValues.Select(c => c.Key + " = @" + c.Key))} " +
                 (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
 
             var paramValues = new ExpandoObject();
-            var dic = (IDictionary<string, object>)paramValues;
+            var dic = (IDictionary<string, object>) paramValues;
             dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
             return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
         }
@@ -107,14 +110,14 @@ namespace OElite.Restme.Dapper
                 throw new ArgumentException(
                     "Delete without condition will remove all data of the requested table(s), the action is disabled for data protection.");
             dbQuery.MapDeleteColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((RestmeDbQuery<T>)dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
+            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
 
             var query =
                 $"delete from {dbQuery.DbTableName} " +
                 (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
 
             var paramValues = new ExpandoObject();
-            var dic = (IDictionary<string, object>)paramValues;
+            var dic = (IDictionary<string, object>) paramValues;
             dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
             return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
         }
@@ -133,28 +136,32 @@ namespace OElite.Restme.Dapper
 
         #region Data Execution
 
-        public static Task<T> FetchAsync<T>(this OEliteDbQueryString query)
-            where T : class, IRestmeDbEntity
+        public static Task<T> FetchAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
+            where T : class
         {
-            return query.DbCentre.FetchAsync<T>(query.Query, query.ParamValues);
+            return query.DbCentre.FetchAsync<T>(query.Query, query.ParamValues, dbCommandType);
         }
 
-        public static Task<TC> FetchAsync<T, TC>(this OEliteDbQueryString query)
+        public static Task<TC> FetchAsync<T, TC>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
             where TC : IRestmeDbEntityCollection<T>, new() where T : IRestmeDbEntity
         {
             return
-
-                    query.DbCentre.FetchAsync<T, TC>(query.Query, query.ParamValues);
+                query.DbCentre.FetchAsync<T, TC>(query.Query, query.ParamValues, query.Paginated, dbCommandType);
         }
 
-        public static Task<long> ExecuteInsertAsync(this OEliteDbQueryString query)
+        public static Task<long> ExecuteInsertAsync(this OEliteDbQueryString query, CommandType? dbCommandType = null)
         {
-            return query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues);
+            return query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType);
         }
 
-        public static Task<int> ExecuteAsync(this OEliteDbQueryString query)
+        public static Task<T> ExecuteInsertAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
         {
-            return query.DbCentre.ExecuteAsync(query.Query, query.ParamValues);
+            return query.DbCentre.ExecuteInsertAsync<T>(query.Query, query.ParamValues, dbCommandType);
+        }
+
+        public static Task<int> ExecuteAsync(this OEliteDbQueryString query, CommandType? dbCommandType = null)
+        {
+            return query.DbCentre.ExecuteAsync(query.Query, query.ParamValues, dbCommandType);
         }
 
         #endregion
