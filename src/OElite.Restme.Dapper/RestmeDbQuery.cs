@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlTypes;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -21,7 +22,8 @@ namespace OElite.Restme.Dapper
         string DbTableName { get; }
 
 
-        Dictionary<string, object> ParamValues { get; }
+        //Dictionary<string, object> ParamValues { get; }
+        ExpandoObject ParamValues { get; }
         void MapSelectColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null);
         void MapUpdateColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null);
         void MapInsertColumns(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null);
@@ -39,7 +41,7 @@ namespace OElite.Restme.Dapper
         public string DbTableName { get; }
 
 
-        public Dictionary<string, object> ParamValues { get; } = new Dictionary<string, object>();
+        public ExpandoObject ParamValues { get; } = new ExpandoObject();
 
 
         public RestmeDbQuery(RestmeDb dbCentre)
@@ -55,7 +57,8 @@ namespace OElite.Restme.Dapper
             string[] choosenPropertiesOnly = null,
             string[] propertiesToExclude = null)
         {
-            ParamValues.Clear();
+            var paramValues = (IDictionary<string, object>) ParamValues;
+            paramValues.Clear();
             var props = DefaultColumnsInQuery.ToList();
             if (choosenPropertiesOnly?.Length > 0)
                 props = DefaultColumnsInQuery.Where(item => choosenPropertiesOnly.Contains(item.Key)).ToList();
@@ -66,19 +69,30 @@ namespace OElite.Restme.Dapper
                 var objValue = data.GetPropertyValue(prop.Key);
                 if (objValue != null && objValue is DateTime)
                 {
-                    if (DateTimeUtils.IsValidSqlDateTimeValue(objValue))
-                        ParamValues.Add(prop.Key, objValue);
+                    paramValues.Add(prop.Key, DateTimeUtils.IsValidSqlDateTimeValue(objValue) ? objValue : null);
+                }
+                else if (objValue != null && (objValue is int || objValue is long))
+                {
+                    if (IsForeignKey(prop) && NumericUtils.GetLongIntegerValueFromObject(objValue) == 0)
+                        paramValues.Add(prop.Key, null);
                     else
-                        ParamValues.Add(prop.Key, null);
+                        paramValues.Add(prop.Key, objValue);
                 }
                 else if (objValue != null && objValue.GetType().GetTypeInfo().IsEnum)
                 {
-                    ParamValues.Add(prop.Key, (int) objValue);
+                    paramValues.Add(prop.Key, (int) objValue);
                 }
                 else
-                    ParamValues.Add(prop.Key, objValue);
+                    paramValues.Add(prop.Key, objValue);
             }
         }
+
+        private bool IsForeignKey(KeyValuePair<string, string> prop)
+        {
+            var columnAttr = ColumnAttributes.Where(item => item.Key == prop.Key).Select(c => c.Value).FirstOrDefault();
+            return (columnAttr?.ColumnType == RestmeDbColumnType.ForeignKey);
+        }
+
 
         public RestmeTableAttribute TableAttribute
         {
@@ -135,16 +149,13 @@ namespace OElite.Restme.Dapper
                                                                  )).ToDictionary(d => d.Key, d => d.Value.DbColumnName) ??
                                    new Dictionary<string, string>();
 
-            if (choosenPropertiesOnly != null && choosenPropertiesOnly.Any())
+            if (choosenPropertiesOnly == null || !choosenPropertiesOnly.Any()) return columnAttributes;
+            var unIdentifiedColumns = choosenPropertiesOnly.Where(item => !ColumnAttributes.ContainsKey(item));
+            var identifiedColumns = unIdentifiedColumns as string[] ?? unIdentifiedColumns.ToArray();
+            if (!identifiedColumns.Any()) return columnAttributes;
+            foreach (var col in identifiedColumns)
             {
-                var unIdentifiedColumns = choosenPropertiesOnly.Where(item => !ColumnAttributes.ContainsKey(item));
-                if (unIdentifiedColumns != null && unIdentifiedColumns.Any())
-                {
-                    foreach (var col in unIdentifiedColumns)
-                    {
-                        columnAttributes.Add(Guid.NewGuid().ToString(), col);
-                    }
-                }
+                columnAttributes.Add(Guid.NewGuid().ToString(), col);
             }
             return columnAttributes;
         }

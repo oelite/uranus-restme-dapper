@@ -15,7 +15,7 @@ namespace OElite.Restme.Dapper
         {
             var offset = pageIndex * pageSize;
             if (outerOrderByClause.IsNullOrEmpty() && !query.Query.ToLower().Contains(" order by "))
-                throw new ArgumentException("invalid order order by clause.");
+                throw new ArgumentException("invalid order by clause.");
 
             var newQuery = string.Empty;
             var orderByIndex = query.Query.IndexOf(" order by ", StringComparison.CurrentCultureIgnoreCase);
@@ -75,10 +75,10 @@ namespace OElite.Restme.Dapper
             if (expectIdentityScope)
                 query = query + $" SELECT CAST(SCOPE_IDENTITY() as bigint)";
 
-            //var paramValues = new ExpandoObject();
-            var dic = new Dictionary<string, object>();
+            var paramValues = new ExpandoObject();
+            var dic = (IDictionary<string, object>) paramValues;
             dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
-            return new OEliteDbQueryString(query, dic, dbQuery.DbCentre ?? new RestmeDb());
+            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
         }
 
         public static OEliteDbQueryString Update<T>(this IRestmeDbQuery dbQuery, T data,
@@ -139,29 +139,64 @@ namespace OElite.Restme.Dapper
         public static Task<T> FetchAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
             where T : class
         {
-            return query.DbCentre.FetchAsync<T>(query.Query, query.ParamValues, dbCommandType);
+            try
+            {
+                return query.DbCentre.FetchAsync<T>(query.Query, query.ParamValues, dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public static Task<TC> FetchAsync<T, TC>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
             where TC : IRestmeDbEntityCollection<T>, new() where T : IRestmeDbEntity
         {
-            return
-                query.DbCentre.FetchAsync<T, TC>(query.Query, query.ParamValues, query.Paginated, dbCommandType);
+            try
+            {
+                return
+                    query.DbCentre.FetchAsync<T, TC>(query.Query, query.ParamValues, query.Paginated, dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public static Task<long> ExecuteInsertAsync(this OEliteDbQueryString query, CommandType? dbCommandType = null)
         {
-            return query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType);
+            try
+            {
+                return query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public static Task<T> ExecuteInsertAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
         {
-            return query.DbCentre.ExecuteInsertAsync<T>(query.Query, query.ParamValues, dbCommandType);
+            try
+            {
+                return query.DbCentre.ExecuteInsertAsync<T>(query.Query, query.ParamValues, dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public static Task<int> ExecuteAsync(this OEliteDbQueryString query, CommandType? dbCommandType = null)
         {
-            return query.DbCentre.ExecuteAsync(query.Query, query.ParamValues, dbCommandType);
+            try
+            {
+                return query.DbCentre.ExecuteAsync(query.Query, query.ParamValues, dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         #endregion

@@ -12,68 +12,125 @@ namespace OElite.Restme.Dapper
         public async Task<T> FetchAsync<T>(string standardQuery, object paramValues, CommandType? dbCommandType = null)
             where T : class
         {
-            var result =
-                await
-                    (await GetOpenConnectionAsync()).QueryFirstOrDefaultAsync<T>(standardQuery, paramValues,
-                        _currentTransaction, commandType: dbCommandType);
-            return result;
+            try
+            {
+                var result =
+                    await
+                        (await GetOpenConnectionAsync()).QueryFirstOrDefaultAsync<T>(standardQuery, paramValues,
+                            _currentTransaction, commandType: dbCommandType);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task<TC> FetchAsync<T, TC>(string query, object paramValues, bool paginatedQuery = false,
             CommandType? dbCommandType = null)
             where TC : IRestmeDbEntityCollection<T>, new() where T : IRestmeDbEntity
         {
-            var resultSet = new TC();
-            if (paginatedQuery)
+            try
             {
-                var results =
-                    await
-                        (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues, _currentTransaction,
-                            commandType: dbCommandType);
-                var totalCount = await results.ReadSingleAsync<int>();
-                var result = (await results.ReadAsync<T>()).ToList();
-                if (totalCount <= 0) return resultSet;
+                var resultSet = new TC();
+                if (paginatedQuery)
+                {
+                    var results =
+                        await
+                            (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues, _currentTransaction,
+                                commandType: dbCommandType);
+                    var totalCount = await results.ReadSingleAsync<int>();
+                    var result = (await results.ReadAsync<T>()).ToList();
+                    if (totalCount <= 0) return resultSet;
 
-                resultSet.TotalRecordsCount = Convert.ToInt32(totalCount);
-                if (result.Any())
-                    resultSet.AddRange(result);
+                    resultSet.TotalRecordsCount = Convert.ToInt32(totalCount);
+                    if (result.Any())
+                        resultSet.AddRange(result);
+                }
+                else
+                {
+                    var results =
+                        await
+                            (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
+                                commandType: dbCommandType);
+                    var enumerable = results as IList<T> ?? results.ToList();
+                    if (enumerable.Any())
+                        resultSet.AddRange(enumerable);
+                    resultSet.TotalRecordsCount = resultSet.Count();
+                }
+                return resultSet;
             }
-            else
+            catch (Exception ex)
             {
-                var results =
-                    await
-                        (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                            commandType: dbCommandType);
-                var enumerable = results as IList<T> ?? results.ToList();
-                if (enumerable.Any())
-                    resultSet.AddRange(enumerable);
+                //TODO: Add logger
+                throw ex;
             }
-            return resultSet;
         }
 
         public async Task<long> ExecuteInsertAsync(string standardQuery, object paramValues,
             CommandType? dbCommandType = null)
         {
-            return
-                await
-                    (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<long>(standardQuery, paramValues,
-                        _currentTransaction, commandType: dbCommandType);
+            try
+            {
+                return
+                    await
+                        (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<long>(standardQuery, paramValues,
+                            _currentTransaction, commandType: dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                //TODO: Add logger
+                throw ex;
+            }
         }
 
         public async Task<T> ExecuteInsertAsync<T>(string standardQuery, object paramValues,
             CommandType? dbCommandType = null)
         {
-            return
-                await
-                    (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<T>(standardQuery, paramValues,
-                        _currentTransaction, commandType: dbCommandType);
+            try
+            {
+                return
+                    await
+                        (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<T>(standardQuery, paramValues,
+                            _currentTransaction, commandType: dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                //TODO: Add logger
+                throw ex;
+            }
         }
 
         public async Task<int> ExecuteAsync(string standardQuery, object paramValues, CommandType? dbCommandType = null)
         {
-            return
-                await
-                    (await GetOpenConnectionAsync()).ExecuteAsync(standardQuery, paramValues, _currentTransaction, commandType: dbCommandType);
+            try
+            {
+                return
+                    await
+                        (await GetOpenConnectionAsync()).ExecuteAsync(standardQuery, paramValues, _currentTransaction,
+                            commandType: dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                //TODO: Add logger
+                throw ex;
+            }
+        }
+
+        public async Task<T> ExecuteScalarAsync<T>(string standardQuery, object paramValues,
+            CommandType? dbCommandType = null)
+        {
+            try
+            {
+                return await (await GetOpenConnectionAsync()).ExecuteScalarAsync<T>(standardQuery, paramValues,
+                    _currentTransaction,
+                    commandType: dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                //TODO: Add logger
+                throw ex;
+            }
         }
     }
 }
