@@ -1,54 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Threading.Tasks;
-using Dapper;
-using System.Data;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace OElite.Restme.Dapper
 {
-    public class OEliteDbQueryString
-    {
-        public OEliteDbQueryString(string query, dynamic paramValues = null, RestmeDb dbCentre = null)
-        {
-            Query = query;
-            ParamValues = paramValues is ExpandoObject ? paramValues : StringUtils.JsonDeserialize<ExpandoObject>(StringUtils.JsonSerialize(paramValues));
-            DbCentre = dbCentre ?? new RestmeDb();
-        }
+	public class OEliteDbQueryString
+	{
+		public OEliteDbQueryString(string query, dynamic paramValues = null, RestmeDb dbCentre = null)
+		{
+			Query = query;
+			ParamValues = (paramValues is ExpandoObject) ? paramValues : JsonConvert.DeserializeObject<ExpandoObject>(JsonConvert.SerializeObject(paramValues), new ExpandoObjectConverter());
+			DbCentre = dbCentre ?? new RestmeDb();
+		}
 
-        public string Query { get; internal set; }
-        public ExpandoObject ParamValues { get; internal set; }
-        public bool Paginated = false;
+		public string Query { get; internal set; }
+		public ExpandoObject ParamValues { get; internal set; }
+		public bool IsPaginated = false;
+		public bool IsExpectingIdentityScope = false;
 
 
-        public RestmeDb DbCentre { get; internal set; }
+		public RestmeDb DbCentre { get; internal set; }
 
-        public OEliteDbQueryString Params(dynamic paramValues)
-        {
-            ParamValues = StringUtils.JsonDeserialize<ExpandoObject>(StringUtils.JsonSerialize(paramValues));
-            return this;
-        }
-        public OEliteDbQueryString AddParams(dynamic paramValues)
-        {
-            if (ParamValues != null)
-            {
-                var merger = (IDictionary<string, object>)ParamValues;
+		public OEliteDbQueryString Params(dynamic paramValues)
+		{
+			ParamValues = (paramValues is ExpandoObject) ? paramValues : JsonConvert.DeserializeObject<ExpandoObject>(JsonConvert.SerializeObject(paramValues), new ExpandoObjectConverter());
+			return this;
+		}
 
-                if (paramValues != null)
-                {
-                    var obj = StringUtils.JsonDeserialize<ExpandoObject>(StringUtils.JsonSerialize(paramValues));
-                    ((IDictionary<string, object>)obj).ToList().ForEach(item =>
-                     {
-                         merger[item.Key] = item.Value;
-                     });
-                }
+		public OEliteDbQueryString AddParams(dynamic paramValues)
+		{
+			if (ParamValues != null)
+			{
+				var merger = (IDictionary<string, object>)ParamValues;
 
-                ParamValues = (ExpandoObject)merger;
-            }
-            else
-                ParamValues = paramValues;
-            return this;
-        }
-    }
+				if (paramValues != null)
+				{
+					var obj = (paramValues is ExpandoObject) ? paramValues : JsonConvert.DeserializeObject<ExpandoObject>(JsonConvert.SerializeObject(paramValues), new ExpandoObjectConverter());
+					((IDictionary<string, object>)obj).ToList().ForEach(item =>
+					 {
+						 merger[item.Key] = item.Value;
+					 });
+				}
+
+				ParamValues = (ExpandoObject)merger;
+			}
+			else
+				ParamValues = paramValues;
+			return this;
+		}
+	}
 }

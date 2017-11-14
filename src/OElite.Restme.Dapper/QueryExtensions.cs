@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
 using System.Data;
+using Microsoft.Extensions.Logging;
 
 namespace OElite.Restme.Dapper
 {
@@ -17,7 +16,7 @@ namespace OElite.Restme.Dapper
             if (outerOrderByClause.IsNullOrEmpty() && !query.Query.ToLower().Contains(" order by "))
                 throw new ArgumentException("invalid order by clause.");
 
-            var newQuery = string.Empty;
+            string newQuery;
             var orderByIndex = query.Query.IndexOf(" order by ", StringComparison.CurrentCultureIgnoreCase);
             var queryWithoutOrderby = string.Empty;
             if (orderByIndex >= 0)
@@ -25,10 +24,12 @@ namespace OElite.Restme.Dapper
                 queryWithoutOrderby = query.Query.Substring(0, orderByIndex);
                 newQuery = $"select count(*) from ({queryWithoutOrderby}) resultSet;";
             }
+            else
+                newQuery = $"select count(*) from ({query.Query}) resultSet;";
 
             if (pageIndex >= 0 && pageSize > 0)
             {
-                query.Paginated = true;
+                query.IsPaginated = true;
                 if (outerOrderByClause.IsNullOrEmpty())
                     query.Query = $"{query.Query} " +
                                   $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
@@ -39,102 +40,177 @@ namespace OElite.Restme.Dapper
                     query.Query = $"select * from ({query.Query}) resultSet order by {outerOrderByClause} " +
                                   $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                 }
+                query.Query = newQuery + query.Query;
             }
-            query.Query = newQuery + query.Query;
+            else
+            {
+                query.IsPaginated = false;
+                if (outerOrderByClause.IsNotNullOrEmpty())
+                {
+                    if (orderByIndex >= 0)
+                        query.Query = queryWithoutOrderby;
+                    query.Query = $"select * from ({query.Query}) resultSet order by {outerOrderByClause} ";
+                }
+            }
             return query;
         }
 
-        public static OEliteDbQueryString Query(this IRestmeDbQuery dbQuery, string whereConditionClause = null,
+        public static OEliteDbQueryString Query<T, TA>(this IRestmeDbQuery<TA> dbQuery,
+            string whereConditionClause = null,
             string orderByClause = null,
             string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
+            where T : IRestmeDbEntity where TA : IRestmeDbEntity
         {
-            var tableSource = dbQuery.CustomSelectTableSource ?? dbQuery.DbTableName;
+            var tableSource = dbQuery.CustomSelectTableSource ?? dbQuery.DefaultTableSource;
             if (orderByClause.IsNullOrEmpty())
                 orderByClause = dbQuery.DefaultOrderByClauseInQuery;
 
-            dbQuery.MapSelectColumns(choosenPropertiesOnly, propertiesToExclude);
-            var selectedColumnsInQuery = dbQuery.DefaultColumnsInQuery.Values;
+
+            var columnsInQuery = dbQuery.MapSelectColumns<T>(choosenPropertiesOnly, propertiesToExclude);
+            var selectedColumnsInQuery = columnsInQuery.Values;
 
             var query = $"select {string.Join(", ", selectedColumnsInQuery)} " +
                         $"from {tableSource} " +
                         (whereConditionClause.IsNullOrEmpty() ? "" : $"where ({whereConditionClause}) ") +
                         (orderByClause.IsNullOrEmpty() ? "" : $"order by {orderByClause}");
+
+
             return new OEliteDbQueryString(query, dbCentre: dbQuery.DbCentre ?? new RestmeDb());
         }
 
-        public static OEliteDbQueryString Insert<T>(this IRestmeDbQuery dbQuery, T data,
-            string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null, bool expectIdentityScope = true)
-            where T : IRestmeDbEntity
+        public static OEliteDbQueryString Query<T>(this IRestmeDbQuery<T> dbQuery, string whereConditionClause = null,
+            string orderByClause = null,
+            string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where T : IRestmeDbEntity
         {
-            dbQuery.MapInsertColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
-
-            var query =
-                $"insert into {dbQuery.DbTableName}({string.Join(",", dbQuery.ParamValues.Select(c => c.Key))}) " +
-                $" values({string.Join(",", dbQuery.ParamValues.Select(c => "@" + c.Key))});";
-            if (expectIdentityScope)
-                query = query + $" SELECT CAST(SCOPE_IDENTITY() as bigint)";
-
-            var paramValues = new ExpandoObject();
-            var dic = (IDictionary<string, object>) paramValues;
-            dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
-            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+            return Query<T, T>(dbQuery, whereConditionClause, orderByClause, choosenPropertiesOnly,
+                propertiesToExclude);
         }
 
-        public static OEliteDbQueryString Update<T>(this IRestmeDbQuery dbQuery, T data,
-            string whereConditionClause, string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
+        public static OEliteDbQueryString FullQuery<T>(this IRestmeDbQuery<T> dbQuery, string fullQuery)
             where T : IRestmeDbEntity
+        {
+            return new OEliteDbQueryString(fullQuery, dbCentre: dbQuery.DbCentre ?? new RestmeDb());
+        }
+
+
+        public static OEliteDbQueryString Insert<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
+            string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null, bool expectIdentityScope = true)
+            where T : IRestmeDbEntity where TA : IRestmeDbEntity
+        {
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Insert, data, choosenPropertiesOnly,
+                propertiesToExclude);
+
+            var query =
+                $"insert into {dbQuery.CustomInsertTableSource ?? dbQuery.DefaultTableSource}({string.Join(",", paramValues.Select(c => c.Key))}) " +
+                $" values({string.Join(",", paramValues.Select(c => "@" + c.Key))});";
+            var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+
+            if (!expectIdentityScope) return result;
+
+            query = query + $" SELECT CAST(SCOPE_IDENTITY() as bigint)";
+            result.Query = query;
+            result.IsExpectingIdentityScope = true;
+
+            return result;
+        }
+
+
+        public static OEliteDbQueryString Update<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
+            string whereConditionClause, string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
+            where T : IRestmeDbEntity where TA : IRestmeDbEntity
         {
             if (whereConditionClause.IsNullOrEmpty())
                 throw new ArgumentException(
                     "Update without condition will update all data records of the requested table(s), the action is disabled for data protection.");
 
-            dbQuery.MapUpdateColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
+            //var columnsInQuery = dbQuery.MapUpdateColumns<T>(choosenPropertiesOnly, propertiesToExclude);
+            var paramUpdateValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Update, data, choosenPropertiesOnly,
+                propertiesToExclude);
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Select, data, choosenPropertiesOnly,
+                propertiesToExclude);
 
             var query =
-                $"update {dbQuery.DbTableName} set {string.Join(", ", dbQuery.ParamValues.Select(c => c.Key + " = @" + c.Key))} " +
+                $"update {dbQuery.CustomUpdateTableSource ?? dbQuery.DefaultTableSource} set {string.Join(", ", paramUpdateValues.Select(c => c.Key + " = @" + c.Key))} " +
                 (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
 
-            var paramValues = new ExpandoObject();
-            var dic = (IDictionary<string, object>) paramValues;
-            dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
             return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
         }
 
-        public static OEliteDbQueryString Delete<T>(this IRestmeDbQuery dbQuery, T data,
+        public static OEliteDbQueryString Update<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
+            Dictionary<string, string> updateColumnNamesMatchedWithPropertyNames, string whereConditionClause,
+            string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
+            where TA : IRestmeDbEntity where T : IRestmeDbEntity
+        {
+            if (whereConditionClause.IsNullOrEmpty())
+                throw new ArgumentException(
+                    "Update without condition will update all data records of the requested table(s), the action is disabled for data protection.");
+            if ((updateColumnNamesMatchedWithPropertyNames?.Count).GetValueOrDefault() == 0)
+                throw new ArgumentException("Cannot update without update columns.");
+
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Select, data, choosenPropertiesOnly,
+                propertiesToExclude);
+
+            var query =
+                $"update {dbQuery.CustomUpdateTableSource ?? dbQuery.DefaultTableSource} set {string.Join(", ", updateColumnNamesMatchedWithPropertyNames.Select(c => c.Key + " = @" + c.Value))} " +
+                (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
+
+            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+        }
+
+        public static OEliteDbQueryString Update<TA>(this IRestmeDbQuery<TA> dbQuery,
+            Dictionary<string, string> updateColumnNamesMatchedWithPropertyNames, string whereConditionClause,
+            dynamic paramValues) where TA : IRestmeDbEntity
+        {
+            if (whereConditionClause.IsNullOrEmpty())
+                throw new ArgumentException(
+                    "Update without condition will update all data records of the requested table(s), the action is disabled for data protection.");
+            if ((updateColumnNamesMatchedWithPropertyNames?.Count).GetValueOrDefault() == 0)
+                throw new ArgumentException("Cannot update without update columns.");
+
+            var query =
+                $"update {dbQuery.CustomUpdateTableSource ?? dbQuery.DefaultTableSource} set {string.Join(", ", updateColumnNamesMatchedWithPropertyNames.Select(c => c.Key + " = @" + c.Value))} " +
+                (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
+
+            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+        }
+
+        public static OEliteDbQueryString Delete<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
             string whereConditionClause, string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null)
+            where T : IRestmeDbEntity where TA : IRestmeDbEntity
+        {
+            if (whereConditionClause.IsNullOrEmpty())
+                throw new ArgumentException(
+                    "Delete without condition will remove all data of the requested table(s), the action is disabled for data protection.");
+
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Delete, data, choosenPropertiesOnly,
+                propertiesToExclude);
+
+            var query =
+                $"delete from {dbQuery.CustomDeleteTableSource ?? dbQuery.DefaultTableSource} " +
+                (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
+
+            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+        }
+
+        public static OEliteDbQueryString Delete<T>(this IRestmeDbQuery<T> dbQuery, string whereConditionClause)
             where T : IRestmeDbEntity
         {
             if (whereConditionClause.IsNullOrEmpty())
                 throw new ArgumentException(
                     "Delete without condition will remove all data of the requested table(s), the action is disabled for data protection.");
-            dbQuery.MapDeleteColumns(choosenPropertiesOnly, propertiesToExclude);
-            ((RestmeDbQuery<T>) dbQuery).PrepareParamValues(data, choosenPropertiesOnly, propertiesToExclude);
 
             var query =
-                $"delete from {dbQuery.DbTableName} " +
+                $"delete from {dbQuery.CustomDeleteTableSource ?? dbQuery.DefaultTableSource} " +
                 (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
 
-            var paramValues = new ExpandoObject();
-            var dic = (IDictionary<string, object>) paramValues;
-            dbQuery.ParamValues.ToList().ForEach(item => dic[item.Key] = item.Value);
-            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
+            return new OEliteDbQueryString(query, null, dbQuery.DbCentre ?? new RestmeDb());
         }
 
-        public static OEliteDbQueryString Delete(this IRestmeDbQuery dbQuery, string whereConditionClause,
-            dynamic paramValues)
-        {
-            if (whereConditionClause.IsNullOrEmpty())
-                throw new ArgumentException(
-                    "Delete without condition will remove all data of the requested table(s), the action is disabled for data protection.");
-            var query =
-                $"delete from {dbQuery.DbTableName} " +
-                (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
-            return new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
-        }
 
         #region Data Execution
+
+
+
 
         public static Task<T> FetchAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
             where T : class
@@ -145,7 +221,8 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                throw ex;
+                RestmeDb.Logger?.LogError(ex.Message, ex);
+                throw;
             }
         }
 
@@ -155,23 +232,28 @@ namespace OElite.Restme.Dapper
             try
             {
                 return
-                    query.DbCentre.FetchAsync<T, TC>(query.Query, query.ParamValues, query.Paginated, dbCommandType);
+                    query.DbCentre.FetchAsync<T, TC>(query.Query, query.ParamValues, query.IsPaginated, dbCommandType);
             }
             catch (Exception ex)
             {
-                throw ex;
+                RestmeDb.Logger?.LogError(ex.Message, ex);
+                throw;
             }
         }
 
-        public static Task<long> ExecuteInsertAsync(this OEliteDbQueryString query, CommandType? dbCommandType = null)
+        public static async Task<long> ExecuteInsertAsync(this OEliteDbQueryString query,
+            CommandType? dbCommandType = null)
         {
             try
             {
-                return query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType);
+                if (query.IsExpectingIdentityScope)
+                    return await query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType);
+                return await query.DbCentre.ExecuteAsync(query.Query, query.ParamValues, dbCommandType);
             }
             catch (Exception ex)
             {
-                throw ex;
+                RestmeDb.Logger?.LogError(ex.Message, ex);
+                throw;
             }
         }
 
@@ -183,7 +265,8 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                throw ex;
+                RestmeDb.Logger?.LogError(ex.Message, ex);
+                throw;
             }
         }
 
@@ -195,7 +278,35 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                throw ex;
+                RestmeDb.Logger?.LogError(ex.Message, ex);
+                throw;
+            }
+        }
+
+        public static Task<T> ExecuteScalarAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
+        {
+            try
+            {
+                return query.DbCentre.ExecuteScalarAsync<T>(query.Query, query.ParamValues, dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                RestmeDb.Logger?.LogError(ex.Message, ex);
+                throw;
+            }
+        }
+
+        public static Task<IList<T>> FetchEnumerableAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null)
+        {
+            try
+            {
+                return query.DbCentre.FetchEnumerableAsync<T>(query.Query, query.ParamValues, query.IsPaginated,
+                    dbCommandType);
+            }
+            catch (Exception ex)
+            {
+                RestmeDb.Logger?.LogError(ex.Message, ex);
+                throw;
             }
         }
 
