@@ -1,8 +1,13 @@
-﻿namespace OElite.Restme.Dapper
+﻿
+using Microsoft.Extensions.Logging;
+
+namespace OElite.Restme.Dapper
 {
     public partial class RestmeDb
     {
-        public static string DefaultConnectionString { get; set; }
+        public string DefaultConnectionString { get; set; }
+
+        public static ILogger Logger { get; set; }
 
     }
 }
