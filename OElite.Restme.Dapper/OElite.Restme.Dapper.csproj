@@ -14,7 +14,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
-    <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionPrefix>2.0.1</VersionPrefix>
     <Authors>OElite Limited</Authors>
     <Owners>OElite Limited</Owners>
   </PropertyGroup>
@@ -23,9 +23,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="NETStandard.Library" Version="2.0.0" />
+    <PackageReference Include="OElite.Restme.Utils" Version="2.0.1-dev5-dev-140" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj" />
-    <ProjectReference Include="..\..\..\RESTme\src\OElite.Restme.Utils\OElite.Restme.Utils.csproj" />
   </ItemGroup>
 </Project>
