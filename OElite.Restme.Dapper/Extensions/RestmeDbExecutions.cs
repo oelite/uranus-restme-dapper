@@ -11,18 +11,20 @@ namespace OElite.Restme.Dapper
 {
     public partial class RestmeDb
     {
-        public async Task<IList<T>> FetchEnumerableAsync<T>(string query, object paramValues, bool paginatedQuery = false,
-            CommandType? dbCommandType = null)
+        public async Task<IList<T>> FetchEnumerableAsync<T>(string query, object paramValues,
+            bool paginatedQuery = false,
+            CommandType? dbCommandType = null, int commandTimeout = 0)
         {
             var results =
-                        await
-                            (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                                commandType: dbCommandType);
+                await
+                    (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
+                        commandType: dbCommandType, commandTimeout: commandTimeout);
             var enumerable = results as IList<T> ?? results.ToList();
             return enumerable;
         }
 
-        public async Task<T> FetchAsync<T>(string standardQuery, object paramValues, CommandType? dbCommandType = null)
+        public async Task<T> FetchAsync<T>(string standardQuery, object paramValues, CommandType? dbCommandType = null,
+            int commandTimeout = 0)
             where T : class
         {
             try
@@ -33,14 +35,13 @@ namespace OElite.Restme.Dapper
                 stopwatch.Start();
 
                 var result =
-                        await
-                            (await GetOpenConnectionAsync()).QueryFirstOrDefaultAsync<T>(standardQuery, paramValues,
-                                _currentTransaction, commandType: dbCommandType);
+                    await
+                        (await GetOpenConnectionAsync()).QueryFirstOrDefaultAsync<T>(standardQuery, paramValues,
+                            _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
 
                 Logger?.LogDebug($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
 
                 return result;
-
             }
             catch (Exception ex)
             {
@@ -51,7 +52,7 @@ namespace OElite.Restme.Dapper
         }
 
         public async Task<TC> FetchAsync<T, TC>(string query, object paramValues, bool paginatedQuery = false,
-            CommandType? dbCommandType = null)
+            CommandType? dbCommandType = null, int commandTimeout = 0)
             where TC : IRestmeDbEntityCollection<T>, new() where T : IRestmeDbEntity
         {
             try
@@ -66,7 +67,7 @@ namespace OElite.Restme.Dapper
                     var results =
                         await
                             (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues, _currentTransaction,
-                                commandType: dbCommandType);
+                                commandType: dbCommandType, commandTimeout: commandTimeout);
                     var totalCount = await results.ReadSingleOrDefaultAsync<int>();
                     var result = (await results.ReadAsync<T>()).ToList();
                     if (totalCount <= 0) return resultSet;
@@ -80,7 +81,7 @@ namespace OElite.Restme.Dapper
                     var results =
                         await
                             (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                                commandType: dbCommandType);
+                                commandType: dbCommandType, commandTimeout: commandTimeout);
                     var enumerable = results as IList<T> ?? results.ToList();
                     if (enumerable.Any())
                         resultSet.AddRange(enumerable);
@@ -93,13 +94,15 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Fetching from db failed\n {ex.Message}\n dbConnection: {_dbConnectionString}\n queyr: {query}", ex);
+                Logger?.LogError(
+                    $"Fetching from db failed\n {ex.Message}\n dbConnection: {_dbConnectionString}\n queyr: {query}",
+                    ex);
                 throw ex;
             }
         }
 
         public async Task<long> ExecuteInsertAsync(string standardQuery, object paramValues,
-            CommandType? dbCommandType = null)
+            CommandType? dbCommandType = null, int commandTimeout = 0)
         {
             try
             {
@@ -110,7 +113,7 @@ namespace OElite.Restme.Dapper
                 var result =
                     await
                         (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<long>(standardQuery, paramValues,
-                            _currentTransaction, commandType: dbCommandType);
+                            _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
 
                 Logger?.LogDebug($"DB query results: \n {result}");
                 Logger?.LogDebug($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
@@ -124,7 +127,7 @@ namespace OElite.Restme.Dapper
         }
 
         public async Task<T> ExecuteInsertAsync<T>(string standardQuery, object paramValues,
-            CommandType? dbCommandType = null)
+            CommandType? dbCommandType = null, int commandTimeout = 0)
         {
             try
             {
@@ -135,7 +138,7 @@ namespace OElite.Restme.Dapper
                 var result =
                     await
                         (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<T>(standardQuery, paramValues,
-                            _currentTransaction, commandType: dbCommandType);
+                            _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
 
                 Logger?.LogDebug($"DB query results: \n {result}");
                 Logger?.LogDebug($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
@@ -148,7 +151,8 @@ namespace OElite.Restme.Dapper
             }
         }
 
-        public async Task<int> ExecuteAsync(string standardQuery, object paramValues, CommandType? dbCommandType = null)
+        public async Task<int> ExecuteAsync(string standardQuery, object paramValues, CommandType? dbCommandType = null,
+            int commandTimeout = 0)
         {
             try
             {
@@ -159,7 +163,7 @@ namespace OElite.Restme.Dapper
                 var result =
                     await
                         (await GetOpenConnectionAsync()).ExecuteAsync(standardQuery, paramValues, _currentTransaction,
-                            commandType: dbCommandType);
+                            commandType: dbCommandType, commandTimeout: commandTimeout);
 
                 Logger?.LogDebug($"DB query results: \n {result}");
                 Logger?.LogDebug($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
@@ -173,7 +177,7 @@ namespace OElite.Restme.Dapper
         }
 
         public async Task<T> ExecuteScalarAsync<T>(string standardQuery, object paramValues,
-            CommandType? dbCommandType = null)
+            CommandType? dbCommandType = null, int commandTimeout = 0)
         {
             try
             {
@@ -183,7 +187,7 @@ namespace OElite.Restme.Dapper
                 stopwatch.Start();
                 var result = await (await GetOpenConnectionAsync()).ExecuteScalarAsync<T>(standardQuery, paramValues,
                     _currentTransaction,
-                    commandType: dbCommandType);
+                    commandType: dbCommandType, commandTimeout: commandTimeout);
                 Logger?.LogDebug($"DB query results: \n {result}");
                 Logger?.LogDebug($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
                 return result;

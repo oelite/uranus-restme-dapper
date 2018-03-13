@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Restme.Dapper.Common (RESTme) is the common library for Restme.Dapper</Description>
-    <OutputType>Library</OutputType>
+    <Description>This is a set of Dapper .Net wrappers and helpers aims to simplify data manipulations in large
+            scale applications without compromise of using ORM
+        </Description>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>OElite.Restme.Dapper.Common</AssemblyName>
+    <AssemblyName>OElite.Restme.Dapper</AssemblyName>
     <PackageTags>RESTme</PackageTags>
     <RepositoryUrl>https://github.com/oelite/RESTme.Dapper</RepositoryUrl>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
@@ -13,14 +14,18 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
-    <VersionPrefix>2.0.0-dev</VersionPrefix>
+    <VersionPrefix>2.0.1</VersionPrefix>
     <Authors>OElite Limited</Authors>
     <Owners>OElite Limited</Owners>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\RESTme\src\OElite.Restme.Utils\OElite.Restme.Utils.csproj" />
+    <PackageReference Include="Dapper" Version="1.50.2">
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
+    <PackageReference Include="OElite.Restme.Utils" Version="2.0.1-dev5-dev-140" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
+    <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj" />
   </ItemGroup>
 </Project>
