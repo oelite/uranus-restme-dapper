@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Data;
+using System.Dynamic;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Converters;
 
 namespace OElite.Restme.Dapper
 {
@@ -19,6 +21,8 @@ namespace OElite.Restme.Dapper
             string newQuery;
             var orderByIndex = query.Query.IndexOf(" order by ", StringComparison.CurrentCultureIgnoreCase);
             var queryWithoutOrderby = string.Empty;
+
+
             if (orderByIndex >= 0)
             {
                 queryWithoutOrderby = query.Query.Substring(0, orderByIndex);

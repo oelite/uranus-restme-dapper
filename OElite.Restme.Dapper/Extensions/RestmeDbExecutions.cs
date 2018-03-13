@@ -67,9 +67,9 @@ namespace OElite.Restme.Dapper
                     var results =
                         await
                             (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues, _currentTransaction,
-                                commandType: dbCommandType, commandTimeout: commandTimeout);
+                                commandType: dbCommandType);
                     var totalCount = await results.ReadSingleOrDefaultAsync<int>();
-                    var result = (await results.ReadAsync<T>()).ToList();
+                    var result = results.Read<T>().AsList();
                     if (totalCount <= 0) return resultSet;
 
                     resultSet.TotalRecordsCount = Convert.ToInt32(totalCount);
