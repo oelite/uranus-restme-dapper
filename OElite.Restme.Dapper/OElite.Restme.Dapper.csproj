@@ -18,12 +18,12 @@
     <Authors>OElite Limited</Authors>
     <Owners>OElite Limited</Owners>
   </PropertyGroup>
-  <ItemGroup>w
+  <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4">
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="NETStandard.Library" Version="2.0.0" />
-    <PackageReference Include="OElite.Restme.Utils" Version="2.0.1-dev5-dev-140" />
+    <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-CI00001" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj" />
