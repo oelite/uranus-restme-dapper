@@ -18,7 +18,6 @@
     <Owners>OElite Limited</Owners>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
     <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-CI00001" />
   </ItemGroup>
 </Project>
