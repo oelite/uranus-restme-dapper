@@ -18,6 +18,7 @@
     <Owners>OElite Limited</Owners>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-CI00001" />
+    <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-CI00002" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.1"/>
   </ItemGroup>
 </Project>

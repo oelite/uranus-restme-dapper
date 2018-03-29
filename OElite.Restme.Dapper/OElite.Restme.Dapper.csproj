@@ -21,7 +21,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4">
     </PackageReference>
-    <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-CI00001" />
+    <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-CI00002" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj" />
