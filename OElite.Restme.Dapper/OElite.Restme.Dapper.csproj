@@ -21,6 +21,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4">
     </PackageReference>
+    <PackageReference Include="MiniProfiler.AspNetCore" Version="4.0.119" />
     <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-CI00002" />
   </ItemGroup>
   <ItemGroup>
