@@ -25,11 +25,11 @@ namespace OElite.Restme.Dapper
 		string DefaultTableSource { get; }
 
 
-		Dictionary<string, string> MapSelectColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
-		Dictionary<string, string> MapUpdateColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
-		Dictionary<string, string> MapInsertColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
-		Dictionary<string, string> MapDeleteColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
-		Dictionary<string, object> PrepareParamValues<A>(RestmeDbQueryType queryType, A data, string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
+		Dictionary<string, string> MapSelectColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
+		Dictionary<string, string> MapUpdateColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
+		Dictionary<string, string> MapInsertColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
+		Dictionary<string, string> MapDeleteColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
+		Dictionary<string, object> PrepareParamValues<A>(RestmeDbQueryType queryType, A data, string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity;
 	}
 
 	public class RestmeDbQuery<T> : IRestmeDbQuery<T> where T : IRestmeDbEntity
@@ -60,7 +60,7 @@ namespace OElite.Restme.Dapper
 
 
 		public Dictionary<string, object> PrepareParamValues<A>(RestmeDbQueryType queryType, A data,
-			string[] choosenPropertiesOnly = null,
+			string[] chosenPropertiesOnly = null,
 			string[] propertiesToExclude = null) where A : IRestmeDbEntity
 		{
 			var paramValues = new Dictionary<string, object>();
@@ -69,24 +69,24 @@ namespace OElite.Restme.Dapper
 			switch (queryType)
 			{
 				case RestmeDbQueryType.Update:
-					props = MapUpdateColumns<T>(choosenPropertiesOnly, propertiesToExclude)?.ToList();
+					props = MapUpdateColumns<T>(chosenPropertiesOnly, propertiesToExclude)?.ToList();
 					break;
 				case RestmeDbQueryType.Delete:
-					props = MapDeleteColumns<T>(choosenPropertiesOnly, propertiesToExclude)?.ToList();
+					props = MapDeleteColumns<T>(chosenPropertiesOnly, propertiesToExclude)?.ToList();
 					break;
 				case RestmeDbQueryType.Insert:
-					props = MapInsertColumns<T>(choosenPropertiesOnly, propertiesToExclude)?.ToList();
+					props = MapInsertColumns<T>(chosenPropertiesOnly, propertiesToExclude)?.ToList();
 					break;
 				default:
 					//when executing select query, use type <A> so all properties will be used
-					props = MapSelectColumns<A>(choosenPropertiesOnly, propertiesToExclude)?.ToList();
+					props = MapSelectColumns<A>(chosenPropertiesOnly, propertiesToExclude)?.ToList();
 					break;
 			}
 
 			if (props?.Count > 0)
 			{
-				if (choosenPropertiesOnly?.Length > 0)
-					props = props.Where(item => choosenPropertiesOnly.Contains(item.Key)).ToList();
+				if (chosenPropertiesOnly?.Length > 0)
+					props = props.Where(item => chosenPropertiesOnly.Contains(item.Key)).ToList();
 				else if (propertiesToExclude?.Length > 0)
 					props = props.Where(item => !propertiesToExclude.Contains(item.Key)).ToList();
 				foreach (var prop in props)
@@ -186,7 +186,7 @@ namespace OElite.Restme.Dapper
 
 
 		private Dictionary<string, string> GenerateDefaultColumnsInQuery<A>(
-			string[] choosenPropertiesOnly = null,
+			string[] chosenPropertiesOnly = null,
 			string[] propertiesToExclude = null, bool? inSelect = null, bool? inInsert = null, bool? inUpdate = null,
 			bool? inDelete = null) where A : IRestmeDbEntity
 		{
@@ -196,8 +196,8 @@ namespace OElite.Restme.Dapper
 																 (inInsert == null || dic.Value.InInsert == inInsert) &&
 																 (inUpdate == null || dic.Value.InUpdate == inUpdate) &&
 																 (inDelete == null || dic.Value.InDelete == inDelete) &&
-																 (choosenPropertiesOnly == null ||
-																  choosenPropertiesOnly.Contains(dic.Key)) &&
+																 (chosenPropertiesOnly == null ||
+																  chosenPropertiesOnly.Contains(dic.Key)) &&
 																 (propertiesToExclude == null ||
 																  !propertiesToExclude.Contains(dic.Key)) &&
 																 (
@@ -207,8 +207,8 @@ namespace OElite.Restme.Dapper
 																 ))?.ToDictionary(d => d.Key, d => d.Value.DbColumnName) ??
 								   new Dictionary<string, string>();
 
-			if (choosenPropertiesOnly == null || !choosenPropertiesOnly.Any()) return columnAttributes;
-			var unIdentifiedColumns = choosenPropertiesOnly.Where(item => defaultTypeAttributes?.ContainsKey(item) != true);
+			if (chosenPropertiesOnly == null || !chosenPropertiesOnly.Any()) return columnAttributes;
+			var unIdentifiedColumns = chosenPropertiesOnly.Where(item => defaultTypeAttributes?.ContainsKey(item) != true);
 			var identifiedColumns = unIdentifiedColumns as string[] ?? unIdentifiedColumns.ToArray();
 			if (!identifiedColumns.Any()) return columnAttributes;
 			foreach (var col in identifiedColumns)
@@ -219,24 +219,24 @@ namespace OElite.Restme.Dapper
 		}
 
 
-		public virtual Dictionary<string, string> MapSelectColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
+		public virtual Dictionary<string, string> MapSelectColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
 			=>
-				GenerateDefaultColumnsInQuery<A>(choosenPropertiesOnly,
+				GenerateDefaultColumnsInQuery<A>(chosenPropertiesOnly,
 					propertiesToExclude, inSelect: true);
 
-		public virtual Dictionary<string, string> MapUpdateColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
+		public virtual Dictionary<string, string> MapUpdateColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
 			=>
-				GenerateDefaultColumnsInQuery<A>(choosenPropertiesOnly,
+				GenerateDefaultColumnsInQuery<A>(chosenPropertiesOnly,
 					propertiesToExclude, inUpdate: true);
 
-		public virtual Dictionary<string, string> MapInsertColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
+		public virtual Dictionary<string, string> MapInsertColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
 			=>
-				GenerateDefaultColumnsInQuery<A>(choosenPropertiesOnly,
+				GenerateDefaultColumnsInQuery<A>(chosenPropertiesOnly,
 					propertiesToExclude, inInsert: true);
 
-		public virtual Dictionary<string, string> MapDeleteColumns<A>(string[] choosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
+		public virtual Dictionary<string, string> MapDeleteColumns<A>(string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null) where A : IRestmeDbEntity
 			=>
-				GenerateDefaultColumnsInQuery<A>(choosenPropertiesOnly,
+				GenerateDefaultColumnsInQuery<A>(chosenPropertiesOnly,
 					propertiesToExclude, inDelete: true);
 
 
