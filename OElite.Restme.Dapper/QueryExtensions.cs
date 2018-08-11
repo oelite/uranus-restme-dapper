@@ -31,6 +31,7 @@ namespace OElite.Restme.Dapper
             else
                 newQuery = $"select count(*) from ({query.Query}) resultSet;";
 
+
             if (pageIndex >= 0 && pageSize > 0)
             {
                 query.IsPaginated = true;
@@ -41,8 +42,9 @@ namespace OElite.Restme.Dapper
                 {
                     if (orderByIndex >= 0)
                         query.Query = queryWithoutOrderby;
-                    query.Query = $"select * from ({query.Query}) resultSet order by {outerOrderByClause} " +
-                                  $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+                    query.Query =
+                        $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
+                        $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                 }
 
                 query.Query = newQuery + query.Query;
@@ -54,7 +56,7 @@ namespace OElite.Restme.Dapper
                 {
                     if (orderByIndex >= 0)
                         query.Query = queryWithoutOrderby;
-                    query.Query = $"select * from ({query.Query}) resultSet order by {outerOrderByClause} ";
+                    query.Query = $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} ";
                 }
             }
 
@@ -73,6 +75,7 @@ namespace OElite.Restme.Dapper
 
 
             var columnsInQuery = dbQuery.MapSelectColumns<T>(chosenPropertiesOnly, propertiesToExclude);
+
             var selectedColumnsInQuery = columnsInQuery.Values;
 
             var query = $"select {string.Join(", ", selectedColumnsInQuery)} " +
@@ -81,7 +84,8 @@ namespace OElite.Restme.Dapper
                         (orderByClause.IsNullOrEmpty() ? "" : $"order by {orderByClause}");
 
 
-            return new OEliteDbQueryString(query, dbCentre: dbQuery.DbCentre ?? new RestmeDb());
+            return new OEliteDbQueryString(query, dbCentre: dbQuery.DbCentre ?? new RestmeDb(),
+                selectColumnNames: selectedColumnsInQuery.ToArray());
         }
 
         public static OEliteDbQueryString Query<T>(this IRestmeDbQuery<T> dbQuery, string whereConditionClause = null,
