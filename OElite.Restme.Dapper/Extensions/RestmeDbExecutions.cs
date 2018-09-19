@@ -15,12 +15,20 @@ namespace OElite.Restme.Dapper
             bool paginatedQuery = false,
             CommandType? dbCommandType = null, int commandTimeout = 0)
         {
-            var results =
-                await
-                    (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                        commandType: dbCommandType, commandTimeout: commandTimeout);
-            var enumerable = results as IList<T> ?? results.ToList();
-            return enumerable;
+            try
+            {
+                var results =
+                    await
+                        (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
+                            commandType: dbCommandType, commandTimeout: commandTimeout);
+                var enumerable = results as IList<T> ?? results.ToList();
+                return enumerable;
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError($"Fetching from db failed\n {ex.Message},ex");
+                throw ex;
+            }
         }
 
         public async Task<T> FetchAsync<T>(string standardQuery, object paramValues, CommandType? dbCommandType = null,
@@ -95,7 +103,7 @@ namespace OElite.Restme.Dapper
             catch (Exception ex)
             {
                 Logger?.LogError(
-                    $"Fetching from db failed\n {ex.Message}\n dbConnection: {_dbConnectionString}\n queyr: {query}",
+                    $"Fetching from db failed\n {ex.Message}\n dbConnection: {_dbConnectionString}\n query: {query}",
                     ex);
                 throw ex;
             }
