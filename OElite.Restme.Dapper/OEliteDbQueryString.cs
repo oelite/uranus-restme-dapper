@@ -22,6 +22,7 @@ namespace OElite.Restme.Dapper
         }
 
         public string Query { get; internal set; }
+        public string InitQuery { get; internal set; }
         public string[] SelectColumnNames { get; set; }
         public ExpandoObject ParamValues { get; internal set; }
         public bool IsPaginated = false;
