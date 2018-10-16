@@ -62,7 +62,7 @@ namespace OElite.Restme.Dapper
             }
 
             return query;
-        }
+        }        
 
         public static OEliteDbQueryString Query<T, TA>(this IRestmeDbQuery<TA> dbQuery,
             string whereConditionClause = null,
@@ -87,7 +87,7 @@ namespace OElite.Restme.Dapper
 
             var result = new OEliteDbQueryString(query, dbCentre: dbQuery.DbCentre ?? new RestmeDb(),
                 selectColumnNames: selectedColumnsInQuery.ToArray());
-            result.InitQuery = initQuery;
+            result.InitialQuery = initQuery;
             return result;
         }
 
@@ -120,7 +120,7 @@ namespace OElite.Restme.Dapper
                 $" values({string.Join(",", paramValues.Select(c => "@" + c.Key))});";
             var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
             if (initQuery.IsNotNullOrEmpty())
-                result.InitQuery = initQuery;
+                result.InitialQuery = initQuery;
 
             if (!expectIdentityScope) return result;
 
@@ -153,7 +153,7 @@ namespace OElite.Restme.Dapper
 
             var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
             if (initQuery.IsNotNullOrEmpty())
-                result.InitQuery = initQuery;
+                result.InitialQuery = initQuery;
             return result;
         }
 
@@ -177,7 +177,7 @@ namespace OElite.Restme.Dapper
 
             var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
             if (initQuery.IsNotNullOrEmpty())
-                result.InitQuery = initQuery;
+                result.InitialQuery = initQuery;
             return result;
         }
 
@@ -197,7 +197,7 @@ namespace OElite.Restme.Dapper
 
             var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
             if (initQuery.IsNotNullOrEmpty())
-                result.InitQuery = initQuery;
+                result.InitialQuery = initQuery;
             return result;
         }
 
@@ -219,7 +219,7 @@ namespace OElite.Restme.Dapper
 
             var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
             if (initQuery.IsNotNullOrEmpty())
-                result.InitQuery = initQuery;
+                result.InitialQuery = initQuery;
             return result;
         }
 
@@ -237,7 +237,7 @@ namespace OElite.Restme.Dapper
 
             var result = new OEliteDbQueryString(query, null, dbQuery.DbCentre ?? new RestmeDb());
             if (initQuery.IsNotNullOrEmpty())
-                result.InitQuery = initQuery;
+                result.InitialQuery = initQuery;
             return result;
         }
 
@@ -250,7 +250,7 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.FetchAsync<T>($"{query.InitQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.FetchAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
                     dbCommandType, commandTimeout);
             }
             catch (Exception ex)
@@ -267,7 +267,7 @@ namespace OElite.Restme.Dapper
             try
             {
                 return
-                    query.DbCentre.FetchAsync<T, TC>($"{query.InitQuery};{query.Query}", query.ParamValues,
+                    query.DbCentre.FetchAsync<T, TC>($"{query.InitialQuery};{query.Query}", query.ParamValues,
                         query.IsPaginated, dbCommandType,
                         commandTimeout);
             }
@@ -286,7 +286,7 @@ namespace OElite.Restme.Dapper
                 if (query.IsExpectingIdentityScope)
                     return await query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType,
                         commandTimeout);
-                return await query.DbCentre.ExecuteAsync($"{query.InitQuery};{query.Query}", query.ParamValues,
+                return await query.DbCentre.ExecuteAsync($"{query.InitialQuery};{query.Query}", query.ParamValues,
                     dbCommandType, commandTimeout);
             }
             catch (Exception ex)
@@ -301,7 +301,7 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.ExecuteInsertAsync<T>($"{query.InitQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.ExecuteInsertAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -317,7 +317,7 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.ExecuteAsync($"{query.InitQuery};{query.Query}", query.ParamValues, dbCommandType,
+                return query.DbCentre.ExecuteAsync($"{query.InitialQuery};{query.Query}", query.ParamValues, dbCommandType,
                     commandTimeout);
             }
             catch (Exception ex)
@@ -332,7 +332,7 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.ExecuteScalarAsync<T>($"{query.InitQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.ExecuteScalarAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -348,7 +348,7 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.FetchEnumerableAsync<T>($"{query.InitQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.FetchEnumerableAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
                     query.IsPaginated,
                     dbCommandType, commandTimeout);
             }
