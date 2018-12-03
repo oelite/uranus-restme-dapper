@@ -6,6 +6,8 @@ using Dapper;
 using System.Data;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.IO;
+using StackExchange.Profiling;
 
 namespace OElite.Restme.Dapper
 {
@@ -65,6 +67,7 @@ namespace OElite.Restme.Dapper
         {
             try
             {
+                SqlMapper.AddTypeMap(typeof(long), DbType.Int32);
                 Logger?.LogDebug($"Fetching using DB query: \n {query} ");
                 Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
                 var stopwatch = new Stopwatch();
@@ -74,7 +77,8 @@ namespace OElite.Restme.Dapper
                 {
                     var results =
                         await
-                            (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues, _currentTransaction,
+                            (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues,
+                                _currentTransaction,
                                 commandType: dbCommandType);
                     var totalCount = await results.ReadSingleOrDefaultAsync<int>();
                     var result = results.Read<T>().AsList();

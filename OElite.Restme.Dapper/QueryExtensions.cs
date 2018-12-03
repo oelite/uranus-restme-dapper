@@ -61,8 +61,10 @@ namespace OElite.Restme.Dapper
                 }
             }
 
+            query.Query = query.Query.Trim(';', ' ');
+
             return query;
-        }        
+        }
 
         public static OEliteDbQueryString Query<T, TA>(this IRestmeDbQuery<TA> dbQuery,
             string whereConditionClause = null,
@@ -242,7 +244,7 @@ namespace OElite.Restme.Dapper
         }
 
 
-        #region Data Execution
+        #region Data Execution        
 
         public static Task<T> FetchAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null,
             int commandTimeout = 0)
@@ -317,7 +319,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.ExecuteAsync($"{query.InitialQuery};{query.Query}", query.ParamValues, dbCommandType,
+                return query.DbCentre.ExecuteAsync($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                    dbCommandType,
                     commandTimeout);
             }
             catch (Exception ex)
