@@ -88,8 +88,13 @@ namespace OElite.Restme.Dapper
         public async Task<IDbTransaction> GetDbTransactionAsync()
         {
             if (_currentTransaction == null)
-                _currentTransaction = (await GetOpenConnectionAsync()).BeginTransaction();
+                _currentTransaction = await NewDbTransactionAsync();
             return _currentTransaction;
+        }
+
+        public async Task<IDbTransaction> NewDbTransactionAsync()
+        {
+            return (await GetOpenConnectionAsync()).BeginTransaction();
         }
 
 
