@@ -6,8 +6,6 @@ using Dapper;
 using System.Data;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.IO;
-using StackExchange.Profiling;
 
 namespace OElite.Restme.Dapper
 {

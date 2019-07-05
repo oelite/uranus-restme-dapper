@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Data;
-using System.Dynamic;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Converters;
 
 namespace OElite.Restme.Dapper
 {
