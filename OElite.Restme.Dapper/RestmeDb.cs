@@ -64,14 +64,12 @@ namespace OElite.Restme.Dapper
         private async Task<IDbConnection> GetOpenConnectionAsync(bool establishTransaction = false,
             string connectionString = null)
         {
-            if (_currentConnection == null)
+            if (_currentConnection == null || _currentConnection.State == ConnectionState.Closed)
             {
-                connectionString = connectionString ?? _dbConnectionString;
+                connectionString ??= _dbConnectionString;
                 _currentConnection = new SqlConnection(connectionString);
                 await ((SqlConnection) _currentConnection).OpenAsync();
             }
-            else if (_currentConnection.State == ConnectionState.Closed)
-                await ((SqlConnection) _currentConnection).OpenAsync();
 
             ;
 
