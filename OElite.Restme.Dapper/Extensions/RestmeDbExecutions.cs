@@ -15,12 +15,20 @@ namespace OElite.Restme.Dapper
             bool paginatedQuery = false,
             CommandType? dbCommandType = null, int commandTimeout = 0)
         {
-            var results =
-                await
-                    (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                        commandType: dbCommandType, commandTimeout: commandTimeout);
-            var enumerable = results as IList<T> ?? results.ToList();
-            return enumerable;
+            try
+            {
+                var results =
+                    await
+                        (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
+                            commandType: dbCommandType, commandTimeout: commandTimeout);
+                var enumerable = results as IList<T> ?? results.ToList();
+                return enumerable;
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError($"Fetching from db failed\n {ex.Message},ex");
+                throw ex;
+            }
         }
 
         public async Task<T> FetchAsync<T>(string standardQuery, object paramValues, CommandType? dbCommandType = null,
@@ -57,6 +65,7 @@ namespace OElite.Restme.Dapper
         {
             try
             {
+                SqlMapper.AddTypeMap(typeof(long), DbType.Int32);
                 Logger?.LogDebug($"Fetching using DB query: \n {query} ");
                 Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
                 var stopwatch = new Stopwatch();
@@ -66,10 +75,11 @@ namespace OElite.Restme.Dapper
                 {
                     var results =
                         await
-                            (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues, _currentTransaction,
-                                commandType: dbCommandType, commandTimeout: commandTimeout);
+                            (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues,
+                                _currentTransaction,
+                                commandType: dbCommandType);
                     var totalCount = await results.ReadSingleOrDefaultAsync<int>();
-                    var result = (await results.ReadAsync<T>()).ToList();
+                    var result = results.Read<T>().AsList();
                     if (totalCount <= 0) return resultSet;
 
                     resultSet.TotalRecordsCount = Convert.ToInt32(totalCount);
@@ -95,7 +105,7 @@ namespace OElite.Restme.Dapper
             catch (Exception ex)
             {
                 Logger?.LogError(
-                    $"Fetching from db failed\n {ex.Message}\n dbConnection: {_dbConnectionString}\n queyr: {query}",
+                    $"Fetching from db failed\n {ex.Message}\n dbConnection: {_dbConnectionString}\n query: {query}",
                     ex);
                 throw ex;
             }
