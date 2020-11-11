@@ -242,7 +242,7 @@ namespace OElite.Restme.Dapper
         }
 
 
-        #region Data Execution        
+        #region Data Execution
 
         public static Task<T> FetchAsync<T>(this OEliteDbQueryString query, CommandType? dbCommandType = null,
             int commandTimeout = 0)
@@ -250,7 +250,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.FetchAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.FetchAsync<T>(
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}", query.ParamValues,
                     dbCommandType, commandTimeout);
             }
             catch (Exception ex)
@@ -267,7 +268,9 @@ namespace OElite.Restme.Dapper
             try
             {
                 return
-                    query.DbCentre.FetchAsync<T, TC>($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                    query.DbCentre.FetchAsync<T, TC>(
+                        $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}",
+                        query.ParamValues,
                         query.IsPaginated, dbCommandType,
                         commandTimeout);
             }
@@ -286,7 +289,8 @@ namespace OElite.Restme.Dapper
                 if (query.IsExpectingIdentityScope)
                     return await query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType,
                         commandTimeout);
-                return await query.DbCentre.ExecuteAsync($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                return await query.DbCentre.ExecuteAsync(
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}", query.ParamValues,
                     dbCommandType, commandTimeout);
             }
             catch (Exception ex)
@@ -301,7 +305,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.ExecuteInsertAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.ExecuteInsertAsync<T>(
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}", query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -317,7 +322,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.ExecuteAsync($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.ExecuteAsync(
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}", query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -333,7 +339,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.ExecuteScalarAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.ExecuteScalarAsync<T>(
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}", query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -349,7 +356,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                return query.DbCentre.FetchEnumerableAsync<T>($"{query.InitialQuery};{query.Query}", query.ParamValues,
+                return query.DbCentre.FetchEnumerableAsync<T>(
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}", query.ParamValues,
                     query.IsPaginated,
                     dbCommandType, commandTimeout);
             }
