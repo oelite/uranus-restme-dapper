@@ -71,7 +71,6 @@ namespace OElite.Restme.Dapper
                 stopwatch.Start();
                 var resultSet = new TC();
                 using var conn = await GetOpenConnectionAsync(); // fetch query can be disposed right after execution
-
                 if (paginatedQuery)
                 {
                     var results =
@@ -91,13 +90,14 @@ namespace OElite.Restme.Dapper
                     var results =
                         await conn.QueryAsync<T>(query, paramValues, _currentTransaction,
                             commandType: dbCommandType, commandTimeout: commandTimeout);
-                    var enumerable = results as IList<T> ?? results.ToList();
+                    var enumerable = results?.ToList();
+                    resultSet.TotalRecordsCount = enumerable.Count;
                     if (enumerable.Any())
                         resultSet.AddRange(enumerable);
-                    resultSet.TotalRecordsCount = resultSet.Count();
                 }
 
-                Logger?.LogInformation($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
+                Logger?.LogInformation(
+                    $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms, records: {resultSet?.Count()}");
 
                 return resultSet;
             }
