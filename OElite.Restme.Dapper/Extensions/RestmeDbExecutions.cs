@@ -17,10 +17,10 @@ namespace OElite.Restme.Dapper
         {
             try
             {
+                using var conn = await GetOpenConnectionAsync(); // fetch query can be disposed right after execution
                 var results =
-                    await
-                        (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                            commandType: dbCommandType, commandTimeout: commandTimeout);
+                    await conn.QueryAsync<T>(query, paramValues, _currentTransaction,
+                        commandType: dbCommandType, commandTimeout: commandTimeout);
                 var enumerable = results as IList<T> ?? results.ToList();
                 return enumerable;
             }
@@ -42,10 +42,9 @@ namespace OElite.Restme.Dapper
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                var result =
-                    await
-                        (await GetOpenConnectionAsync()).QueryFirstOrDefaultAsync<T>(standardQuery, paramValues,
-                            _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
+                using var conn = await GetOpenConnectionAsync(); // fetch query can be disposed right after execution
+                var result = await conn.QueryFirstOrDefaultAsync<T>(standardQuery, paramValues,
+                    _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
 
                 Logger?.LogDebug($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
 
@@ -71,13 +70,14 @@ namespace OElite.Restme.Dapper
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var resultSet = new TC();
+                using var conn = await GetOpenConnectionAsync(); // fetch query can be disposed right after execution
+
                 if (paginatedQuery)
                 {
                     var results =
-                        await
-                            (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues,
-                                _currentTransaction,
-                                commandType: dbCommandType);
+                        await conn.QueryMultipleAsync(query, paramValues,
+                            _currentTransaction,
+                            commandType: dbCommandType);
                     var totalCount = await results.ReadSingleOrDefaultAsync<int>();
                     var result = results.Read<T>().AsList();
                     if (totalCount <= 0) return resultSet;
@@ -89,9 +89,8 @@ namespace OElite.Restme.Dapper
                 else
                 {
                     var results =
-                        await
-                            (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                                commandType: dbCommandType, commandTimeout: commandTimeout);
+                        await conn.QueryAsync<T>(query, paramValues, _currentTransaction,
+                            commandType: dbCommandType, commandTimeout: commandTimeout);
                     var enumerable = results as IList<T> ?? results.ToList();
                     if (enumerable.Any())
                         resultSet.AddRange(enumerable);
