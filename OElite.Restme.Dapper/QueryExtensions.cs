@@ -116,7 +116,7 @@ namespace OElite.Restme.Dapper
                 propertiesToExclude);
 
             var query =
-                $"insert into {dbQuery.CustomInsertTableSource ?? dbQuery.DefaultTableSource}({string.Join(",", paramValues.Select(c => c.Key))}) " +
+                $"insert into {dbQuery.CustomInsertTableSource ?? dbQuery.DefaultTableSource}({string.Join(",", paramValues.Select(c => "[" + c.Key + "]"))}) " +
                 $" values({string.Join(",", paramValues.Select(c => "@" + c.Key))});";
             var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
             if (initQuery.IsNotNullOrEmpty())
@@ -148,7 +148,7 @@ namespace OElite.Restme.Dapper
                 propertiesToExclude);
 
             var query =
-                $"update {dbQuery.CustomUpdateTableSource ?? dbQuery.DefaultTableSource} set {string.Join(", ", paramUpdateValues.Select(c => c.Key + " = @" + c.Key))} " +
+                $"update {dbQuery.CustomUpdateTableSource ?? dbQuery.DefaultTableSource} set {string.Join(", ", paramUpdateValues.Select(c => "[" + c.Key + "] = @" + c.Key))} " +
                 (whereConditionClause.IsNullOrEmpty() ? "" : $" where ({whereConditionClause}) ");
 
             var result = new OEliteDbQueryString(query, paramValues, dbQuery.DbCentre ?? new RestmeDb());
@@ -251,7 +251,8 @@ namespace OElite.Restme.Dapper
             try
             {
                 return query.DbCentre.FetchAsync<T>(
-                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}", query.ParamValues,
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}",
+                    query.ParamValues,
                     dbCommandType, commandTimeout);
             }
             catch (Exception ex)
@@ -290,7 +291,8 @@ namespace OElite.Restme.Dapper
                     return await query.DbCentre.ExecuteInsertAsync(query.Query, query.ParamValues, dbCommandType,
                         commandTimeout);
                 return await query.DbCentre.ExecuteAsync(
-                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}", query.ParamValues,
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}",
+                    query.ParamValues,
                     dbCommandType, commandTimeout);
             }
             catch (Exception ex)
@@ -306,7 +308,8 @@ namespace OElite.Restme.Dapper
             try
             {
                 return query.DbCentre.ExecuteInsertAsync<T>(
-                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}", query.ParamValues,
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}",
+                    query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -323,7 +326,8 @@ namespace OElite.Restme.Dapper
             try
             {
                 return query.DbCentre.ExecuteAsync(
-                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}", query.ParamValues,
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}",
+                    query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -340,7 +344,8 @@ namespace OElite.Restme.Dapper
             try
             {
                 return query.DbCentre.ExecuteScalarAsync<T>(
-                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}", query.ParamValues,
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}",
+                    query.ParamValues,
                     dbCommandType,
                     commandTimeout);
             }
@@ -357,7 +362,8 @@ namespace OElite.Restme.Dapper
             try
             {
                 return query.DbCentre.FetchEnumerableAsync<T>(
-                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}", query.ParamValues,
+                    $"{(query.InitialQuery.IsNullOrEmpty() ? "" : query.InitialQuery + ";")}{query.Query}",
+                    query.ParamValues,
                     query.IsPaginated,
                     dbCommandType, commandTimeout);
             }
