@@ -33,7 +33,10 @@ namespace OElite.Restme.Dapper
             if (pageIndex >= 0 && pageSize > 0)
             {
                 query.IsPaginated = true;
-                query.SelectColumnNames = query.SelectColumnNames.Append("TotalRecordsCount").ToArray();
+                if (query.SelectColumnNames.Length > 0)
+                {
+                    query.SelectColumnNames = query.SelectColumnNames.Append("TotalRecordsCount").ToArray();
+                }
 
                 if (outerOrderByClause.IsNullOrEmpty())
                     query.Query = $"{query.Query} " +
