@@ -35,7 +35,9 @@ namespace OElite.Restme.Dapper
                 query.IsPaginated = true;
                 if (query.SelectColumnNames.Length > 0)
                 {
-                    query.SelectColumnNames = query.SelectColumnNames.Append("TotalRecordsCount").ToArray();
+                    var names = query.SelectColumnNames.ToList();
+                    names.Add("TotalRecordsCount");
+                    query.SelectColumnNames = names.ToArray();
                 }
 
                 if (outerOrderByClause.IsNullOrEmpty())
