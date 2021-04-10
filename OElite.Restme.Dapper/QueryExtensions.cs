@@ -16,7 +16,7 @@ namespace OElite.Restme.Dapper
             if (outerOrderByClause.IsNullOrEmpty() && !query.Query.ToLower().Contains(" order by "))
                 throw new ArgumentException("invalid order by clause.");
 
-            string newQuery;
+            // string newQuery;
             var orderByIndex = query.Query.IndexOf(" order by ", StringComparison.CurrentCultureIgnoreCase);
             var queryWithoutOrderby = string.Empty;
 
@@ -42,13 +42,13 @@ namespace OElite.Restme.Dapper
 
                 if (outerOrderByClause.IsNullOrEmpty())
                     query.Query = $"{query.Query} " +
-                                  $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+                                  $" OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                 else
                 {
                     if (orderByIndex >= 0)
                         query.Query = queryWithoutOrderby;
-                    query.Query = $"{query.Query} order by {outerOrderByClause}" +
-                                  $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+                    query.Query = $"{query.Query} order by {outerOrderByClause} " +
+                                  $" OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                     // query.Query =
                     //     $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
                     //     $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
