@@ -24,15 +24,17 @@ namespace OElite.Restme.Dapper
             if (orderByIndex >= 0)
             {
                 queryWithoutOrderby = query.Query.Substring(0, orderByIndex);
-                newQuery = $"select count(*) from ({queryWithoutOrderby}) resultSet;";
+                // newQuery = $"select count(*) from ({queryWithoutOrderby}) resultSet;";
             }
-            else
-                newQuery = $"select count(*) from ({query.Query}) resultSet;";
+            // else
+            // newQuery = $"select count(*) from ({query.Query}) resultSet;";
 
 
             if (pageIndex >= 0 && pageSize > 0)
             {
                 query.IsPaginated = true;
+                query.SelectColumnNames = query.SelectColumnNames.Append("TotalRecordsCount").ToArray();
+
                 if (outerOrderByClause.IsNullOrEmpty())
                     query.Query = $"{query.Query} " +
                                   $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
@@ -40,12 +42,14 @@ namespace OElite.Restme.Dapper
                 {
                     if (orderByIndex >= 0)
                         query.Query = queryWithoutOrderby;
-                    query.Query =
-                        $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
-                        $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+                    query.Query = $"{query.Query} order by {outerOrderByClause}" +
+                                  $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+                    // query.Query =
+                    //     $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
+                    //     $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                 }
 
-                query.Query = newQuery + query.Query;
+                // query.Query = newQuery + query.Query;
             }
             else
             {
@@ -54,8 +58,12 @@ namespace OElite.Restme.Dapper
                 {
                     if (orderByIndex >= 0)
                         query.Query = queryWithoutOrderby;
+
                     query.Query =
-                        $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} ";
+                        $"{query.Query} order by {outerOrderByClause} ";
+
+                    // query.Query =
+                    //     $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} ";
                 }
             }
 

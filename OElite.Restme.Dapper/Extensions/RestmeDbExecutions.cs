@@ -69,30 +69,40 @@ namespace OElite.Restme.Dapper
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var resultSet = new TC();
-                if (paginatedQuery)
-                {
-                    var results =
-                        await (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues,
-                            _currentTransaction,
-                            commandType: dbCommandType);
-                    var totalCount = await results.ReadSingleOrDefaultAsync<int>();
-                    var result = results.Read<T>().AsList();
-                    if (totalCount <= 0) return resultSet;
+                // if (paginatedQuery)
+                // {
+                //     var results =
+                //         await (await GetOpenConnectionAsync()).QueryMultipleAsync(query, paramValues,
+                //             _currentTransaction,
+                //             commandType: dbCommandType);
+                //     var totalCount = await results.ReadSingleOrDefaultAsync<int>();
+                //     var result = results.Read<T>().AsList();
+                //     if (totalCount <= 0) return resultSet;
+                //
+                //     resultSet.TotalRecordsCount = Convert.ToInt32(totalCount);
+                //     if (result.Any())
+                //         resultSet.AddRange(result);
+                // }
+                // else
+                // {
+                var results =
+                    await (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
+                        commandType: dbCommandType, commandTimeout: commandTimeout);
+                var enumerable = results?.ToList();
+                resultSet.TotalRecordsCount = enumerable.Count;
 
-                    resultSet.TotalRecordsCount = Convert.ToInt32(totalCount);
-                    if (result.Any())
-                        resultSet.AddRange(result);
-                }
-                else
+                if (paginatedQuery && enumerable?.Count > 0)
                 {
-                    var results =
-                        await (await GetOpenConnectionAsync()).QueryAsync<T>(query, paramValues, _currentTransaction,
-                            commandType: dbCommandType, commandTimeout: commandTimeout);
-                    var enumerable = results?.ToList();
-                    resultSet.TotalRecordsCount = enumerable.Count;
-                    if (enumerable.Any())
-                        resultSet.AddRange(enumerable);
+                    var firstItem = enumerable.FirstOrDefault();
+                    var totalRecordsCount =
+                        NumericUtils.GetIntegerValueFromObject(firstItem.GetFieldValue("TotalRecordsCount"));
+                    if (totalRecordsCount >= resultSet.TotalRecordsCount)
+                        resultSet.TotalRecordsCount = totalRecordsCount;
                 }
+
+                if (enumerable.Any())
+                    resultSet.AddRange(enumerable);
+                // }
 
                 Logger?.LogInformation(
                     $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms, records: {resultSet?.Count()}");
