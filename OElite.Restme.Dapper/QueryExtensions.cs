@@ -40,7 +40,7 @@ namespace OElite.Restme.Dapper
                     query.Query.Substring(query.Query.IndexOf(" from ", StringComparison.InvariantCultureIgnoreCase));
 
                 query.Query =
-                    $" {queryFirstFromClause},count(*) over () as RestmeTotalRecordsCount {queryAfterFromClause}";
+                    $" {queryFirstFromClause},count(*) over () as TotalRecordsCount {queryAfterFromClause}";
 
 
                 if (outerOrderByClause.IsNullOrEmpty())
@@ -52,10 +52,10 @@ namespace OElite.Restme.Dapper
                     {
                         var names = query.SelectColumnNames.ToList();
                         if (names?.Count(item =>
-                            item.Equals("count(*) over () as RestmeTotalRecordsCount",
+                            item.Equals("count(*) over () as TotalRecordsCount",
                                 StringComparison.InvariantCultureIgnoreCase)) <= 0)
                         {
-                            names.Add("count(*) over () as RestmeTotalRecordsCount");
+                            names.Add("count(*) over () as TotalRecordsCount");
                             query.SelectColumnNames = names.ToArray();
                         }
                     }
@@ -64,7 +64,7 @@ namespace OElite.Restme.Dapper
                         query.Query = queryWithoutOrderby;
 
                     query.Query =
-                        $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*, count(*) over () as RestmeTotalRecordsCount")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
+                        $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
                         $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                 }
 
