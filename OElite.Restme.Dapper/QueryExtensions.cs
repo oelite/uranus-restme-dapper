@@ -33,25 +33,39 @@ namespace OElite.Restme.Dapper
             if (pageIndex >= 0 && pageSize > 0)
             {
                 query.IsPaginated = true;
-                if (query.SelectColumnNames?.Length > 0)
-                {
-                    var names = query.SelectColumnNames.ToList();
-                    names.Add("RestmeTotalRecordsCount");
-                    query.SelectColumnNames = names.ToArray();
-                }
+
+                var queryFirstFromClause = query.Query.Substring(0,
+                    query.Query.IndexOf(" from ", StringComparison.InvariantCultureIgnoreCase));
+                var queryAfterFromClause =
+                    query.Query.Substring(query.Query.IndexOf(" from ", StringComparison.InvariantCultureIgnoreCase));
+
+                query.Query =
+                    $" {queryFirstFromClause},count(*) over () as RestmeTotalRecordsCount {queryAfterFromClause}";
+
 
                 if (outerOrderByClause.IsNullOrEmpty())
                     query.Query = $"{query.Query} " +
                                   $" OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                 else
                 {
+                    if (query.SelectColumnNames?.Length > 0)
+                    {
+                        var names = query.SelectColumnNames.ToList();
+                        if (names?.Count(item =>
+                            item.Equals("count(*) over () as RestmeTotalRecordsCount",
+                                StringComparison.InvariantCultureIgnoreCase)) <= 0)
+                        {
+                            names.Add("count(*) over () as RestmeTotalRecordsCount");
+                            query.SelectColumnNames = names.ToArray();
+                        }
+                    }
+
                     if (orderByIndex >= 0)
                         query.Query = queryWithoutOrderby;
-                    query.Query = $"{query.Query} order by {outerOrderByClause} " +
-                                  $" OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
-                    // query.Query =
-                    //     $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
-                    //     $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+
+                    query.Query =
+                        $"select {(query.SelectColumnNames?.Length > 0 ? string.Join(",", query.SelectColumnNames) : "*, count(*) over () as RestmeTotalRecordsCount")} from ({query.Query}) resultSet order by {outerOrderByClause} " +
+                        $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                 }
 
                 // query.Query = newQuery + query.Query;
