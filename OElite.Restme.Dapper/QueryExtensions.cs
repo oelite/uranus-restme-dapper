@@ -36,7 +36,7 @@ namespace OElite.Restme.Dapper
                 if (query.SelectColumnNames?.Length > 0)
                 {
                     var names = query.SelectColumnNames.ToList();
-                    names.Add("TotalRecordsCount");
+                    names.Add("RestmeTotalRecordsCount");
                     query.SelectColumnNames = names.ToArray();
                 }
 

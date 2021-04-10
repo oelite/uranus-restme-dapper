@@ -95,7 +95,7 @@ namespace OElite.Restme.Dapper
                 {
                     var firstItem = enumerable.FirstOrDefault();
                     var totalRecordsCount =
-                        NumericUtils.GetIntegerValueFromObject(firstItem.GetFieldValue("TotalRecordsCount"));
+                        NumericUtils.GetIntegerValueFromObject(firstItem.GetFieldValue("RestmeTotalRecordsCount"));
                     if (totalRecordsCount >= resultSet.TotalRecordsCount)
                         resultSet.TotalRecordsCount = totalRecordsCount;
                 }
