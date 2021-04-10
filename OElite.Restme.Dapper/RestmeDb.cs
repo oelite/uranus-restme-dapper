@@ -34,6 +34,8 @@ namespace OElite.Restme.Dapper
 
         bool disposed = false;
 
+        public int ExecutionPerformanceThresholdInMs = 500;
+
         public void Dispose()
         {
             Dispose(true);
