@@ -40,7 +40,7 @@ namespace OElite.Restme.Dapper
                     query.Query.Substring(query.Query.IndexOf(" from ", StringComparison.InvariantCultureIgnoreCase));
 
                 query.Query =
-                    $" {queryFirstFromClause},count(*) over () as TotalRecordsCount {queryAfterFromClause}";
+                    $" {queryFirstFromClause},count(*) over () as BaseSearchCount {queryAfterFromClause}";
 
 
                 if (outerOrderByClause.IsNullOrEmpty())
@@ -52,10 +52,10 @@ namespace OElite.Restme.Dapper
                     {
                         var names = query.SelectColumnNames.ToList();
                         if (names?.Count(item =>
-                            item.Equals("count(*) over () as TotalRecordsCount",
+                            item.Equals("count(*) over () as BaseSearchCount",
                                 StringComparison.InvariantCultureIgnoreCase)) <= 0)
                         {
-                            names.Add("count(*) over () as TotalRecordsCount");
+                            names.Add("count(*) over () as BaseSearchCount");
                             query.SelectColumnNames = names.ToArray();
                         }
                     }

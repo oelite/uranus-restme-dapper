@@ -94,10 +94,8 @@ namespace OElite.Restme.Dapper
                 if (paginatedQuery && enumerable?.Count > 0)
                 {
                     var firstItem = enumerable.FirstOrDefault();
-                    var totalRecordsCount =
-                        NumericUtils.GetIntegerValueFromObject(firstItem.GetFieldValue("TotalRecordsCount"));
-                    if (totalRecordsCount >= resultSet.TotalRecordsCount)
-                        resultSet.TotalRecordsCount = totalRecordsCount;
+                    if (firstItem.BaseSearchCount > 0 && firstItem.BaseSearchCount >= resultSet.TotalRecordsCount)
+                        resultSet.TotalRecordsCount = firstItem.BaseSearchCount;
                 }
 
                 if (enumerable.Any())
