@@ -14,18 +14,22 @@ namespace OElite
         public RestmeDbColumnType ColumnType = RestmeDbColumnType.NormalColumn;
 
         public RestmeDbColumnAttribute(RestmeDbColumnType type = RestmeDbColumnType.NormalColumn,
-            [CallerMemberName] string dbColumnName = null)
+            string dbColumnName = null, [CallerMemberName] string callerMemberName = "")
         {
-            if (dbColumnName.IsNullOrEmpty())
+            if (dbColumnName.IsNullOrEmpty() && callerMemberName.IsNullOrEmpty())
                 throw new ArgumentNullException(nameof(dbColumnName));
 
-            DbColumnName = dbColumnName;
+            DbColumnName = dbColumnName.IsNullOrEmpty() ? callerMemberName : dbColumnName;
             SetPropertiesByColumnType(type);
         }
 
-        public RestmeDbColumnAttribute(string dbColumnName, RestmeDbColumnType type)
+        public RestmeDbColumnAttribute(string dbColumnName, RestmeDbColumnType type,
+            [CallerMemberName] string callerMemberName = "")
         {
-            DbColumnName = dbColumnName;
+            if (dbColumnName.IsNullOrEmpty() && callerMemberName.IsNullOrEmpty())
+                throw new ArgumentNullException(nameof(dbColumnName));
+
+            DbColumnName = dbColumnName.IsNullOrEmpty() ? callerMemberName : dbColumnName;
             SetPropertiesByColumnType(type);
         }
 
