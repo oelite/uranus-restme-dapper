@@ -94,7 +94,7 @@ namespace OElite.Restme.Dapper
         public static OEliteDbQueryString Query<T, TA>(this IRestmeDbQuery<TA> dbQuery,
             string whereConditionClause = null,
             string orderByClause = null,
-            string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null, string initQuery = null)
+            string[] chosenColumnsOnly = null, string[] columnsToExclude = null, string initQuery = null)
             where T : IRestmeDbEntity where TA : IRestmeDbEntity
         {
             var tableSource = dbQuery.CustomSelectTableSource ?? dbQuery.DefaultTableSource;
@@ -102,7 +102,7 @@ namespace OElite.Restme.Dapper
                 orderByClause = dbQuery.DefaultOrderByClauseInQuery;
 
 
-            var columnsInQuery = dbQuery.MapSelectColumns<T>(chosenPropertiesOnly, propertiesToExclude);
+            var columnsInQuery = dbQuery.MapSelectColumns<T>(chosenColumnsOnly, columnsToExclude);
 
             var selectedColumnsInQuery = columnsInQuery.Values;
 
@@ -120,11 +120,11 @@ namespace OElite.Restme.Dapper
 
         public static OEliteDbQueryString Query<T>(this IRestmeDbQuery<T> dbQuery, string whereConditionClause = null,
             string orderByClause = null,
-            string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null, string initQuery = null)
+            string[] chosenColumnsOnly = null, string[] columnsToExclude = null, string initQuery = null)
             where T : IRestmeDbEntity
         {
-            return Query<T, T>(dbQuery, whereConditionClause, orderByClause, chosenPropertiesOnly,
-                propertiesToExclude, initQuery);
+            return Query<T, T>(dbQuery, whereConditionClause, orderByClause, chosenColumnsOnly,
+                columnsToExclude, initQuery);
         }
 
         public static OEliteDbQueryString FullQuery<T>(this IRestmeDbQuery<T> dbQuery, string fullQuery)
@@ -135,12 +135,12 @@ namespace OElite.Restme.Dapper
 
 
         public static OEliteDbQueryString Insert<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
-            string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null, bool expectIdentityScope = true,
+            string[] chosenColumnsOnly = null, string[] columnsToExclude = null, bool expectIdentityScope = true,
             string initQuery = null)
             where T : IRestmeDbEntity where TA : IRestmeDbEntity
         {
-            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Insert, data, chosenPropertiesOnly,
-                propertiesToExclude);
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Insert, data, chosenColumnsOnly,
+                columnsToExclude);
 
             var query =
                 $"insert into {dbQuery.CustomInsertTableSource ?? dbQuery.DefaultTableSource}({string.Join(",", paramValues.Select(c => "[" + c.Key + "]"))}) " +
@@ -160,7 +160,7 @@ namespace OElite.Restme.Dapper
 
 
         public static OEliteDbQueryString Update<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
-            string whereConditionClause, string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null,
+            string whereConditionClause, string[] chosenColumnsOnly = null, string[] columnsToExclude = null,
             string initQuery = null)
             where T : IRestmeDbEntity where TA : IRestmeDbEntity
         {
@@ -168,11 +168,11 @@ namespace OElite.Restme.Dapper
                 throw new ArgumentException(
                     "Update without condition will update all data records of the requested table(s), the action is disabled for data protection.");
 
-            //var columnsInQuery = dbQuery.MapUpdateColumns<T>(chosenPropertiesOnly, propertiesToExclude);
-            var paramUpdateValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Update, data, chosenPropertiesOnly,
-                propertiesToExclude);
-            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Select, data, chosenPropertiesOnly,
-                propertiesToExclude);
+            //var columnsInQuery = dbQuery.MapUpdateColumns<T>(chosenColumnsOnly, columnsToExclude);
+            var paramUpdateValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Update, data, chosenColumnsOnly,
+                columnsToExclude);
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Select, data, chosenColumnsOnly,
+                columnsToExclude);
 
             var query =
                 $"update {dbQuery.CustomUpdateTableSource ?? dbQuery.DefaultTableSource} set {string.Join(", ", paramUpdateValues.Select(c => "[" + c.Key + "] = @" + c.Key))} " +
@@ -186,7 +186,7 @@ namespace OElite.Restme.Dapper
 
         public static OEliteDbQueryString Update<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
             Dictionary<string, string> updateColumnNamesMatchedWithPropertyNames, string whereConditionClause,
-            string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null, string initQuery = null)
+            string[] chosenColumnsOnly = null, string[] columnsToExclude = null, string initQuery = null)
             where TA : IRestmeDbEntity where T : IRestmeDbEntity
         {
             if (whereConditionClause.IsNullOrEmpty())
@@ -195,8 +195,8 @@ namespace OElite.Restme.Dapper
             if ((updateColumnNamesMatchedWithPropertyNames?.Count).GetValueOrDefault() == 0)
                 throw new ArgumentException("Cannot update without update columns.");
 
-            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Select, data, chosenPropertiesOnly,
-                propertiesToExclude);
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Select, data, chosenColumnsOnly,
+                columnsToExclude);
 
             var query =
                 $"update {dbQuery.CustomUpdateTableSource ?? dbQuery.DefaultTableSource} set {string.Join(", ", updateColumnNamesMatchedWithPropertyNames.Select(c => c.Key + " = @" + c.Value))} " +
@@ -229,7 +229,7 @@ namespace OElite.Restme.Dapper
         }
 
         public static OEliteDbQueryString Delete<T, TA>(this IRestmeDbQuery<TA> dbQuery, T data,
-            string whereConditionClause, string[] chosenPropertiesOnly = null, string[] propertiesToExclude = null,
+            string whereConditionClause, string[] chosenColumnsOnly = null, string[] columnsToExclude = null,
             string initQuery = null)
             where T : IRestmeDbEntity where TA : IRestmeDbEntity
         {
@@ -237,8 +237,8 @@ namespace OElite.Restme.Dapper
                 throw new ArgumentException(
                     "Delete without condition will remove all data of the requested table(s), the action is disabled for data protection.");
 
-            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Delete, data, chosenPropertiesOnly,
-                propertiesToExclude);
+            var paramValues = dbQuery.PrepareParamValues(RestmeDbQueryType.Delete, data, chosenColumnsOnly,
+                columnsToExclude);
 
             var query =
                 $"delete from {dbQuery.CustomDeleteTableSource ?? dbQuery.DefaultTableSource} " +
