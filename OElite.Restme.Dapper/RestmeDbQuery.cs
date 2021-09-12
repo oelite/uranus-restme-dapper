@@ -223,8 +223,8 @@ namespace OElite.Restme.Dapper
                                        (columnsToExclude == null ||
                                         !columnsToExclude.Contains(dic.Key)) &&
                                        (
-                                           tableAttribute.ExcludedProperties == null ||
-                                           !tableAttribute.ExcludedProperties.Contains(
+                                           tableAttribute.ExcludedColumns == null ||
+                                           !tableAttribute.ExcludedColumns.Contains(
                                                dic.Key)
                                        ))?.ToDictionary(d => d.Key, d => d.Value.DbColumnName) ??
                                    new Dictionary<string, string>();
