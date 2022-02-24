@@ -3,7 +3,7 @@
         <Description>This is a set of Dapper .Net wrappers and helpers aims to simplify data manipulations in large
             scale applications without compromise of using ORM
         </Description>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <AssemblyName>OElite.Restme.Dapper</AssemblyName>
         <PackageTags>RESTme</PackageTags>
         <RepositoryUrl>https://github.com/oelite/RESTme.Dapper</RepositoryUrl>
@@ -19,12 +19,13 @@
         <Owners>OElite Limited</Owners>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Dapper" Version="2.0.123">
+        <PackageReference Include="Dapper" Version="2.0.78">
         </PackageReference>
-        <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-dev-250"/>
-        <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0"/>
+        <PackageReference Include="MiniProfiler.AspNetCore" Version="4.2.22" />
+        <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-dev-240" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj"/>
+        <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj" />
     </ItemGroup>
 </Project>
