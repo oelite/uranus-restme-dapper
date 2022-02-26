@@ -3,7 +3,7 @@
         <Description>This is a set of Dapper .Net wrappers and helpers aims to simplify data manipulations in large
             scale applications without compromise of using ORM
         </Description>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>OElite.Restme.Dapper</AssemblyName>
         <PackageTags>RESTme</PackageTags>
         <RepositoryUrl>https://github.com/oelite/RESTme.Dapper</RepositoryUrl>

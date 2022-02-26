@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Description>Restme.Dapper.Common (RESTme) is the common library for Restme.Dapper</Description>
         <OutputType>Library</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>OElite.Restme.Dapper.Common</AssemblyName>
         <PackageTags>RESTme</PackageTags>
         <RepositoryUrl>https://github.com/oelite/RESTme.Dapper</RepositoryUrl>
@@ -19,6 +19,6 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-dev-240"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0"/>
     </ItemGroup>
 </Project>
