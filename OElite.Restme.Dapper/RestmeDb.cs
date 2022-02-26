@@ -5,7 +5,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using StackExchange.Profiling;
 
 namespace OElite.Restme.Dapper
 {
@@ -81,8 +80,7 @@ namespace OElite.Restme.Dapper
             if (establishTransaction)
                 await GetDbTransactionAsync();
 
-            return new StackExchange.Profiling.Data.ProfiledDbConnection(_currentConnection as SqlConnection,
-                MiniProfiler.Current);
+            return _currentConnection;
         }
 
         public async Task<IDbTransaction> GetDbTransactionAsync()
