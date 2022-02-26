@@ -128,7 +128,7 @@ namespace OElite.Restme.Dapper
                     }
                     catch (Exception ex)
                     {
-                        RestmeDb.Logger?.LogError(ex.Message, ex);
+                        RestmeDb.Logger?.LogError(ex.Message, ex, queryType, data, chosenColumnsOnly, columnsToExclude);
                     }
                 }
             }

@@ -25,7 +25,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Fetching from db failed\n {ex.Message},ex");
+                Logger?.LogError($"Fetching from db failed\n {ex.Message},ex", ex, query, paramValues);
                 throw ex;
             }
         }
@@ -58,7 +58,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Fetching from db failed\n {ex.Message}", ex);
+                Logger?.LogError($"Fetching from db failed\n {ex.Message}", ex, standardQuery, paramValues);
 
                 throw ex;
             }
@@ -124,8 +124,8 @@ namespace OElite.Restme.Dapper
             catch (Exception ex)
             {
                 Logger?.LogError(
-                    $"Fetching from db failed\n {ex.Message}\n dbConnection: {_dbConnectionString}\n query: {query}",
-                    ex);
+                    $"Fetching from db failed\n {ex.Message}",
+                    ex, query, paramValues, dbCommandType);
                 throw ex;
             }
         }
@@ -159,7 +159,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex);
+                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex, standardQuery, paramValues);
                 throw ex;
             }
         }
@@ -193,7 +193,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex);
+                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex, standardQuery, paramValues);
                 throw ex;
             }
         }
@@ -227,7 +227,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex);
+                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex, standardQuery, paramValues);
                 throw ex;
             }
         }
@@ -259,7 +259,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex);
+                Logger?.LogError($"Executing DB query failed: \n {ex.Message}", ex, standardQuery, paramValues);
                 throw ex;
             }
         }

@@ -52,8 +52,8 @@ namespace OElite.Restme.Dapper
                     {
                         var names = query.SelectColumnNames.ToList();
                         if (names?.Count(item =>
-                            item.Equals("count(*) over () as BaseSearchCount",
-                                StringComparison.InvariantCultureIgnoreCase)) <= 0)
+                                item.Equals("count(*) over () as BaseSearchCount",
+                                    StringComparison.InvariantCultureIgnoreCase)) <= 0)
                         {
                             names.Add("count(*) over () as BaseSearchCount");
                             query.SelectColumnNames = names.ToArray();
@@ -284,7 +284,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                RestmeDb.Logger?.LogError(ex.Message, ex);
+                RestmeDb.Logger?.LogError(ex.Message, ex, query);
                 throw;
             }
         }
@@ -304,7 +304,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                RestmeDb.Logger?.LogError(ex.Message, ex);
+                RestmeDb.Logger?.LogError(ex.Message, ex, query);
                 throw;
             }
         }
@@ -324,7 +324,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                RestmeDb.Logger?.LogError(ex.Message, ex);
+                RestmeDb.Logger?.LogError(ex.Message, ex, query);
                 throw;
             }
         }
@@ -342,7 +342,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                RestmeDb.Logger?.LogError(ex.Message, ex);
+                RestmeDb.Logger?.LogError(ex.Message, ex, query);
                 throw;
             }
         }
@@ -360,7 +360,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                RestmeDb.Logger?.LogError(ex.Message, ex);
+                RestmeDb.Logger?.LogError(ex.Message, ex, query);
                 throw;
             }
         }
@@ -378,7 +378,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                RestmeDb.Logger?.LogError(ex.Message, ex);
+                RestmeDb.Logger?.LogError(ex.Message, ex, query);
                 throw;
             }
         }
@@ -396,7 +396,7 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                RestmeDb.Logger?.LogError(ex.Message, ex);
+                RestmeDb.Logger?.LogError(ex.Message, ex, query);
                 throw;
             }
         }
