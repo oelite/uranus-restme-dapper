@@ -46,12 +46,15 @@ namespace OElite.Restme.Dapper
                     _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms", dbCommandType,
+                    Logger?.LogWarning(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
+                        dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
+                    Logger?.LogInformation(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
                 return result;
@@ -59,7 +62,6 @@ namespace OElite.Restme.Dapper
             catch (Exception ex)
             {
                 Logger?.LogError($"Fetching from db failed\n {ex.Message}", ex, standardQuery, paramValues);
-
                 throw ex;
             }
         }
@@ -111,12 +113,14 @@ namespace OElite.Restme.Dapper
 
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms", dbCommandType,
+                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {query}",
+                        dbCommandType,
                         query, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
+                    Logger?.LogInformation(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {query}");
                 }
 
                 return resultSet;
@@ -147,12 +151,15 @@ namespace OElite.Restme.Dapper
                 Logger?.LogInformation($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms", dbCommandType,
+                    Logger?.LogWarning(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
+                        dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
+                    Logger?.LogInformation(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
                 return result;
@@ -181,12 +188,15 @@ namespace OElite.Restme.Dapper
                 Logger?.LogInformation($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms", dbCommandType,
+                    Logger?.LogWarning(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
+                        dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
+                    Logger?.LogInformation(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
                 return result;
@@ -215,12 +225,15 @@ namespace OElite.Restme.Dapper
                 Logger?.LogInformation($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms", dbCommandType,
+                    Logger?.LogWarning(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
+                        dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
+                    Logger?.LogInformation(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
                 return result;
@@ -247,12 +260,15 @@ namespace OElite.Restme.Dapper
                 Logger?.LogInformation($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms", dbCommandType,
+                    Logger?.LogWarning(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
+                        dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms");
+                    Logger?.LogInformation(
+                        $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
                 return result;
