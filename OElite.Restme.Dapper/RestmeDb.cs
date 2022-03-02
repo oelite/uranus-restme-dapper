@@ -38,6 +38,7 @@ namespace OElite.Restme.Dapper
         public void Dispose()
         {
             Dispose(true);
+            GC.Collect();
             GC.SuppressFinalize(this);
         }
 
@@ -47,6 +48,22 @@ namespace OElite.Restme.Dapper
                 return;
             if (disposing)
             {
+                try
+                {
+                    _currentTransaction.Dispose();
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    _currentConnection?.Close();
+                }
+                catch
+                {
+                }
+
                 try
                 {
                     _currentConnection.Dispose();
@@ -69,7 +86,7 @@ namespace OElite.Restme.Dapper
             {
                 connectionString ??= _dbConnectionString;
                 _currentConnection = new SqlConnection(connectionString);
-                await ((SqlConnection) _currentConnection).OpenAsync();
+                await ((SqlConnection)_currentConnection).OpenAsync();
             }
 
             ;
@@ -99,16 +116,16 @@ namespace OElite.Restme.Dapper
         public T DbQuery<TE, T>() where T : IRestmeDbQuery<TE> where TE : IRestmeDbEntity
         {
             var query = _dbQueries.FirstOrDefault(item => item is T);
-            if (query != null) return (T) query;
+            if (query != null) return (T)query;
 
             var genericType = typeof(T);
 
-            var typeWithGeneric = genericType.MakeGenericType(new[] {typeof(TE)});
+            var typeWithGeneric = genericType.MakeGenericType(new[] { typeof(TE) });
 
-            query = (IRestmeDbQuery<IRestmeDbEntity>) Activator.CreateInstance(typeWithGeneric, new object[] {this});
+            query = (IRestmeDbQuery<IRestmeDbEntity>)Activator.CreateInstance(typeWithGeneric, new object[] { this });
             if (query != null)
                 _dbQueries.Add(query);
-            return (T) query;
+            return (T)query;
         }
 
         public IRestmeDbQuery<T> DbQuery<T>(string customSelectTableSource = null,
@@ -116,7 +133,7 @@ namespace OElite.Restme.Dapper
             string customDeleteTableSource = null) where T : IRestmeDbEntity
         {
             var query = _dbQueries.FirstOrDefault(item => item is IRestmeDbQuery<T>);
-            if (query != null) return (IRestmeDbQuery<T>) query;
+            if (query != null) return (IRestmeDbQuery<T>)query;
 
             return new RestmeDbQuery<T>(this, customSelectTableSource, customInsertTableSource, customUpdateTableSource,
                 customDeleteTableSource);
