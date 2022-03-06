@@ -15,6 +15,7 @@ namespace OElite.Restme.Dapper
             bool paginatedQuery = false,
             CommandType? dbCommandType = null, int commandTimeout = 0)
         {
+            var stopWatch = Stopwatch.StartNew();
             try
             {
                 var results =
@@ -25,7 +26,9 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Fetching from db failed\n {ex.Message},ex", ex, query, paramValues);
+                Logger?.LogError(
+                    $"Fetching enumerable result from db failed\n {ex.Message}  - sw: {stopWatch.ElapsedMilliseconds}ms ",
+                    ex, query, paramValues);
                 throw ex;
             }
         }
@@ -34,12 +37,13 @@ namespace OElite.Restme.Dapper
             int commandTimeout = 0)
             where T : class
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             try
             {
                 Logger?.LogInformation($"Fetching using DB query: \n {standardQuery} ");
                 Logger?.LogInformation($"DB query parameters: \n {paramValues?.JsonSerialize()}");
-                var stopwatch = new Stopwatch();
-                stopwatch.Start();
 
                 var result = await (await GetOpenConnectionAsync()).QueryFirstOrDefaultAsync<T>(standardQuery,
                     paramValues,
@@ -61,7 +65,8 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Fetching from db failed\n {ex.Message}", ex, standardQuery, paramValues);
+                Logger?.LogError($"Fetching from db failed\n {ex.Message} - sw: {stopwatch.ElapsedMilliseconds}ms", ex,
+                    standardQuery, paramValues);
                 throw ex;
             }
         }
