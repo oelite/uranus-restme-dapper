@@ -65,7 +65,9 @@ namespace OElite.Restme.Dapper
             }
             catch (Exception ex)
             {
-                Logger?.LogError($"Fetching from db failed\n {ex.Message} - sw: {stopwatch.ElapsedMilliseconds}ms", ex,
+                Logger?.LogError(
+                    $"Fetching from db failed\n Query: {standardQuery} \n {ex.Message} - sw: {stopwatch.ElapsedMilliseconds}ms",
+                    ex,
                     standardQuery, paramValues);
                 throw ex;
             }
@@ -133,7 +135,7 @@ namespace OElite.Restme.Dapper
             catch (Exception ex)
             {
                 Logger?.LogError(
-                    $"Fetching from db failed\n {ex.Message}",
+                    $"Fetching from db failed\n Query: {query}\n Error: {ex.Message}",
                     ex, query, paramValues, dbCommandType);
                 throw ex;
             }
