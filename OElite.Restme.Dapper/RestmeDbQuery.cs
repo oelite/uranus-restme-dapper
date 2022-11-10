@@ -18,12 +18,12 @@ namespace OElite.Restme.Dapper
     {
         RestmeDb DbCentre { get; set; }
 
-        string DefaultOrderByClauseInQuery { get; }
-        string CustomSelectTableSource { get; }
-        string CustomUpdateTableSource { get; }
-        string CustomDeleteTableSource { get; }
-        string CustomInsertTableSource { get; }
-        string DefaultTableSource { get; }
+        string DefaultOrderByClauseInQuery { get; set; }
+        string CustomSelectTableSource { get; set; }
+        string CustomUpdateTableSource { get; set; }
+        string CustomDeleteTableSource { get; set; }
+        string CustomInsertTableSource { get; set; }
+        string DefaultTableSource { get; set; }
 
 
         Dictionary<string, string> MapSelectColumns<A>(string[] chosenColumnsOnly = null,
@@ -46,12 +46,12 @@ namespace OElite.Restme.Dapper
     {
         public RestmeDb DbCentre { get; set; }
 
-        public virtual string DefaultOrderByClauseInQuery { get; private set; }
-        public virtual string CustomSelectTableSource { get; private set; }
-        public virtual string CustomUpdateTableSource { get; private set; }
-        public virtual string CustomDeleteTableSource { get; private set; }
-        public virtual string CustomInsertTableSource { get; private set; }
-        public virtual string DefaultTableSource { get; private set; }
+        public virtual string DefaultOrderByClauseInQuery { get; set; }
+        public virtual string CustomSelectTableSource { get; set; }
+        public virtual string CustomUpdateTableSource { get; set; }
+        public virtual string CustomDeleteTableSource { get; set; }
+        public virtual string CustomInsertTableSource { get; set; }
+        public virtual string DefaultTableSource { get; set; }
 
         private static Dictionary<string, Dictionary<string, RestmeDbColumnAttribute>> _defaultAttributesFromTypes =
             new Dictionary<string, Dictionary<string, RestmeDbColumnAttribute>>();
