@@ -42,22 +42,22 @@ namespace OElite.Restme.Dapper
 
             try
             {
-                Logger?.LogInformation($"Fetching using DB query: \n {standardQuery} ");
-                Logger?.LogInformation($"DB query parameters: \n {paramValues?.JsonSerialize()}");
+                Logger?.LogDebug($"Fetching using DB query: \n {standardQuery} ");
+                Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
 
                 var result = await (await GetOpenConnectionAsync()).QueryFirstOrDefaultAsync<T>(standardQuery,
                     paramValues,
                     _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
                         dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
@@ -80,8 +80,8 @@ namespace OElite.Restme.Dapper
             try
             {
                 SqlMapper.AddTypeMap(typeof(long), DbType.Int32);
-                Logger?.LogInformation($"Fetching using DB query: \n {query} ");
-                Logger?.LogInformation($"DB query parameters: \n {paramValues?.JsonSerialize()}");
+                Logger?.LogDebug($"Fetching using DB query: \n {query} ");
+                Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var resultSet = new TC();
@@ -120,13 +120,13 @@ namespace OElite.Restme.Dapper
 
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {query}",
+                    Logger?.LogDebug($"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {query}",
                         dbCommandType,
                         query, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {query}");
                 }
 
@@ -146,8 +146,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                Logger?.LogInformation($"Executing insert DB query: \n {standardQuery} ");
-                Logger?.LogInformation($"DB query parameters: \n {paramValues?.JsonSerialize()}");
+                Logger?.LogDebug($"Executing insert DB query: \n {standardQuery} ");
+                Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var result =
@@ -155,17 +155,17 @@ namespace OElite.Restme.Dapper
                         (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<long>(standardQuery, paramValues,
                             _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
 
-                Logger?.LogInformation($"DB query results: \n {result}");
+                Logger?.LogDebug($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
                         dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
@@ -183,8 +183,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                Logger?.LogInformation($"Executing insert DB query: \n {standardQuery} ");
-                Logger?.LogInformation($"DB query parameters: \n {paramValues?.JsonSerialize()}");
+                Logger?.LogDebug($"Executing insert DB query: \n {standardQuery} ");
+                Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var result =
@@ -192,17 +192,17 @@ namespace OElite.Restme.Dapper
                         (await GetOpenConnectionAsync()).QuerySingleOrDefaultAsync<T>(standardQuery, paramValues,
                             _currentTransaction, commandType: dbCommandType, commandTimeout: commandTimeout);
 
-                Logger?.LogInformation($"DB query results: \n {result}");
+                Logger?.LogDebug($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
                         dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
@@ -220,8 +220,8 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                Logger?.LogInformation($"Executing DB query: \n {standardQuery} ");
-                Logger?.LogInformation($"DB query parameters: \n {paramValues?.JsonSerialize()}");
+                Logger?.LogDebug($"Executing DB query: \n {standardQuery} ");
+                Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var result =
@@ -229,17 +229,17 @@ namespace OElite.Restme.Dapper
                         (await GetOpenConnectionAsync()).ExecuteAsync(standardQuery, paramValues, _currentTransaction,
                             commandType: dbCommandType, commandTimeout: commandTimeout);
 
-                Logger?.LogInformation($"DB query results: \n {result}");
+                Logger?.LogDebug($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
                         dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
@@ -257,24 +257,24 @@ namespace OElite.Restme.Dapper
         {
             try
             {
-                Logger?.LogInformation($"Executing DB query: \n {standardQuery} ");
-                Logger?.LogInformation($"DB query parameters: \n {paramValues?.JsonSerialize()}");
+                Logger?.LogDebug($"Executing DB query: \n {standardQuery} ");
+                Logger?.LogDebug($"DB query parameters: \n {paramValues?.JsonSerialize()}");
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 var result = await (await GetOpenConnectionAsync()).ExecuteScalarAsync<T>(standardQuery, paramValues,
                     _currentTransaction,
                     commandType: dbCommandType, commandTimeout: commandTimeout);
-                Logger?.LogInformation($"DB query results: \n {result}");
+                Logger?.LogDebug($"DB query results: \n {result}");
                 if (stopwatch.ElapsedMilliseconds >= ExecutionPerformanceThresholdInMs)
                 {
-                    Logger?.LogWarning(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}",
                         dbCommandType,
                         standardQuery, paramValues);
                 }
                 else
                 {
-                    Logger?.LogInformation(
+                    Logger?.LogDebug(
                         $"DB query execution time: \n {stopwatch.ElapsedMilliseconds} ms \n {standardQuery}");
                 }
 
