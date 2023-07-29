@@ -35,7 +35,7 @@ steps:
     inputs:
       script: |
         dotnet pack OElite.Restme.Dapper.Common/OElite.Restme.Dapper.Common.csproj -o $(Build.ArtifactStagingDirectory)/oelite-pack -c Release --version-suffix ci$(Build.BuildId)
-        dotnet pack OElite.Restme/OElite.Dapper.csproj -o $(Build.ArtifactStagingDirectory)/oelite-pack -c Release --version-suffix ci$(Build.BuildId)
+        dotnet pack OElite.Restme.Dapper/OElite.Restme.Dapper.csproj -o $(Build.ArtifactStagingDirectory)/oelite-pack -c Release --version-suffix ci$(Build.BuildId)
 
   - task: NuGetCommand@2
     displayName: 'Push Restme Nuget Packages'
