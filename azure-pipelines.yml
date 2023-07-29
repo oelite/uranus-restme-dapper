@@ -28,7 +28,7 @@ steps:
     displayName: 'Restore Nuget'
     inputs:
       script: |
-        dotent restore --no-cache --configfile ./NuGet.config
+        dotnet restore --no-cache --configfile ./NuGet.config
 
   - task: CmdLine@2
     displayName: 'Pack Nuget Packages'
