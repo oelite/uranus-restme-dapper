@@ -13,12 +13,12 @@
         <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
         <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
         <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
-        <VersionPrefix>2.0.5</VersionPrefix>
+        <Version>2.0.6</Version>
         <Authors>OElite Limited</Authors>
         <Owners>OElite Limited</Owners>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-dev-329"/>
+        <PackageReference Include="OElite.Restme.Utils" Version="2.0.3-ci212"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0"/>
     </ItemGroup>
 </Project>

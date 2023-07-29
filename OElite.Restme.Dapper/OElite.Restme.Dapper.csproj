@@ -14,17 +14,17 @@
         <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
         <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
         <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
-        <VersionPrefix>2.0.5</VersionPrefix>
+        <Version>2.0.6</Version>
         <Authors>OElite Limited</Authors>
         <Owners>OElite Limited</Owners>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Dapper" Version="2.0.123">
         </PackageReference>
-        <PackageReference Include="OElite.Restme.Utils" Version="2.0.2-dev-329" />
-        <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+        <PackageReference Include="OElite.Restme.Utils" Version="2.0.3-ci212"/>
+        <PackageReference Include="System.Data.SqlClient" Version="4.8.5"/>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj" />
+        <ProjectReference Include="..\OElite.Restme.Dapper.Common\OElite.Restme.Dapper.Common.csproj"/>
     </ItemGroup>
 </Project>
