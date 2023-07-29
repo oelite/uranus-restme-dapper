@@ -24,11 +24,11 @@ steps:
       version: '6.x'
       packageType: sdk
 
-  - task: DotNetCoreCLI@2
+  - task: CmdLine@2
+    displayName: 'Restore Nuget'
     inputs:
-      command: 'restore'
-      feedsToUse: 'config'
-      nugetConfigPath: 'NuGet.config'
+      script: |
+        dotent restore --no-cache --configfile ./NuGet.config
 
   - task: CmdLine@2
     displayName: 'Pack Nuget Packages'
