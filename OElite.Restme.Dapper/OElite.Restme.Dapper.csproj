@@ -8,15 +8,15 @@
         <AssemblyName>OElite.Restme.Dapper</AssemblyName>
         <PackageTags>RESTme</PackageTags>
         <RepositoryUrl>https://oelite.visualstudio.com/Uranus</RepositoryUrl>
-        <Version>2.0.7</Version>
-        <AssemblyVersion>2.0.7</AssemblyVersion>
+        <VersionPrefix>2.0.8</VersionPrefix>
+        <AssemblyVersion>2.0.8</AssemblyVersion>
         <Authors>OElite Limited</Authors>
         <Owners>OElite Limited</Owners>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Dapper" Version="2.0.123">
         </PackageReference>
-        <PackageReference Include="OElite.Restme.Utils" Version="2.0.3-ci212"/>
+        <PackageReference Include="OElite.Restme.Utils" Version="2.0.4-ci219"/>
         <PackageReference Include="System.Data.SqlClient" Version="4.8.5"/>
     </ItemGroup>
     <ItemGroup>
