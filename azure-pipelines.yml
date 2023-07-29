@@ -31,14 +31,14 @@ steps:
       nugetConfigPath: 'NuGet.config'
 
   - task: CmdLine@2
-    displayName: 'Pack Restme Nuget Packages'
+    displayName: 'Pack Nuget Packages'
     inputs:
       script: |
         dotnet pack OElite.Restme.Dapper.Common/OElite.Restme.Dapper.Common.csproj -o $(Build.ArtifactStagingDirectory)/oelite-pack -c Release --version-suffix ci$(Build.BuildId)
         dotnet pack OElite.Restme.Dapper/OElite.Restme.Dapper.csproj -o $(Build.ArtifactStagingDirectory)/oelite-pack -c Release --version-suffix ci$(Build.BuildId)
 
   - task: NuGetCommand@2
-    displayName: 'Push Restme Nuget Packages'
+    displayName: 'Push Nuget Packages'
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'

@@ -4,17 +4,12 @@
             scale applications without compromise of using ORM
         </Description>
         <TargetFramework>net6.0</TargetFramework>
+        <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
         <AssemblyName>OElite.Restme.Dapper</AssemblyName>
         <PackageTags>RESTme</PackageTags>
-        <RepositoryUrl>https://github.com/oelite/RESTme.Dapper</RepositoryUrl>
-        <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-        <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-        <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-        <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
+        <RepositoryUrl>https://oelite.visualstudio.com/Uranus</RepositoryUrl>
         <Version>2.0.7</Version>
+        <AssemblyVersion>2.0.7</AssemblyVersion>
         <Authors>OElite Limited</Authors>
         <Owners>OElite Limited</Owners>
     </PropertyGroup>
