@@ -50,7 +50,7 @@ namespace OElite.Restme.Dapper
             {
                 try
                 {
-                    _currentTransaction.Dispose();
+                    _currentTransaction?.Dispose();
                 }
                 catch
                 {
@@ -66,7 +66,7 @@ namespace OElite.Restme.Dapper
 
                 try
                 {
-                    _currentConnection.Dispose();
+                    _currentConnection?.Dispose();
                 }
                 catch
                 {
