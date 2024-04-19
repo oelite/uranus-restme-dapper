@@ -1,9 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>Restme.Dapper.Common (RESTme) is the common library for Restme.Dapper</Description>
         <OutputType>Library</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
-        <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>OElite.Restme.Dapper.Common</AssemblyName>
         <PackageTags>RESTme</PackageTags>
         <RepositoryUrl>https://oelite.visualstudio.com/Uranus</RepositoryUrl>

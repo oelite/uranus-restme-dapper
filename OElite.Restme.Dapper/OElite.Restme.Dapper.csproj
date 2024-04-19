@@ -1,10 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Description>This is a set of Dapper .Net wrappers and helpers aims to simplify data manipulations in large
             scale applications without compromise of using ORM
         </Description>
-        <TargetFramework>net6.0</TargetFramework>
-        <DebugType Condition="'$(OS)' != 'Windows_NT'">portable</DebugType>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>OElite.Restme.Dapper</AssemblyName>
         <PackageTags>RESTme</PackageTags>
         <RepositoryUrl>https://oelite.visualstudio.com/Uranus</RepositoryUrl>
